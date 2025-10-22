@@ -1,0 +1,156 @@
+[tool.poetry]
+name = "linear-solver"
+version = "1.0.0"
+description = "Biblioteca para resolução de sistemas lineares usando métodos numéricos iterativos"
+authors = ["João Monteiro <joao.monteiro@example.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/joaomonteiro/numerical-methods-for-pde"
+repository = "https://github.com/joaomonteiro/numerical-methods-for-pde"
+documentation = "https://github.com/joaomonteiro/numerical-methods-for-pde"
+keywords = ["numerical-methods", "linear-algebra", "iterative-methods", "pde", "mathematics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [{include = "linear_solver"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.21.0"
+matplotlib = "^3.5.0"
+pandas = "^1.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+pytest-cov = "^4.0.0"
+black = "^23.0.0"
+flake8 = "^6.0.0"
+mypy = "^1.0.0"
+isort = "^5.12.0"
+pre-commit = "^3.0.0"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^6.0.0"
+sphinx-rtd-theme = "^1.2.0"
+myst-parser = "^1.0.0"
+
+[tool.poetry.group.analysis.dependencies]
+seaborn = "^0.12.0"
+scipy = "^1.10.0"
+jupyter = "^1.0.0"
+ipykernel = "^6.20.0"
+
+[tool.poetry.scripts]
+linear-solver = "linear_solver.cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# Configurações de ferramentas de desenvolvimento
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["linear_solver"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "matplotlib.*",
+    "pandas.*",
+    "seaborn.*",
+    "scipy.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--tb=short", 
+    "--strict-markers",
+    "--disable-warnings",
+    "--color=yes"
+]
+markers = [
+    "slow: marca testes que demoram mais para executar",
+    "integration: testes de integração", 
+    "unit: testes unitários",
+    "convergence: testes específicos de convergência"
+]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+
+[tool.coverage.run]
+source = ["linear_solver"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "setup.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
