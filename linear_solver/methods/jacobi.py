@@ -45,6 +45,7 @@ class JacobiSolver(LinearSolver):
         x_new = np.zeros(n)
         
         self.convergence_history = []
+        residual_history = []
         
         for iteration in range(self.max_iterations):
             # Aplicar fórmula iterativa de Jacobi
@@ -52,28 +53,36 @@ class JacobiSolver(LinearSolver):
                 sum_ax = sum(A[i, j] * x[j] for j in range(n) if j != i)
                 x_new[i] = (b[i] - sum_ax) / A[i, i]
             
-            # Calcular erro e verificar convergência
+            # Calcular erro e resíduo
             error = np.linalg.norm(x_new - x, ord=np.inf)
+            residual = np.linalg.norm(A @ x_new - b)
+            
             self.convergence_history.append(error)
+            residual_history.append(residual)
             
             if self._check_convergence(x_new, x):
                 info = {
                     'converged': True,
                     'iterations': iteration + 1,
                     'final_error': error,
+                    'final_residual': residual,
                     'method': self.get_method_name(),
-                    'convergence_history': self.convergence_history.copy()
+                    'convergence_history': self.convergence_history.copy(),
+                    'residual_history': residual_history.copy()
                 }
                 return x_new.copy(), info
             
             x, x_new = x_new, x
         
         # Não convergiu
+        final_residual = np.linalg.norm(A @ x - b)
         info = {
             'converged': False,
             'iterations': self.max_iterations,
             'final_error': self.convergence_history[-1],
+            'final_residual': final_residual,
             'method': self.get_method_name(),
-            'convergence_history': self.convergence_history.copy()
+            'convergence_history': self.convergence_history.copy(),
+            'residual_history': residual_history.copy()
         }
         return x.copy(), info

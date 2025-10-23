@@ -17,7 +17,7 @@ class JacobiOrder2Solver(LinearSolver):
     onde x_jacobi^(k+1) é a iteração padrão do Jacobi.
     """
     
-    def __init__(self, tolerance: float = 1e-6, max_iterations: int = 1000, 
+    def __init__(self, tolerance: float = 1e-4, max_iterations: int = 1000, 
                  omega1: float = 1.0, omega2: float = 0.0, omega3: float = 0.0):
         """
         Inicializa o método Jacobi de ordem 2.
@@ -61,6 +61,7 @@ class JacobiOrder2Solver(LinearSolver):
         x_jacobi = np.zeros(n)
         
         self.convergence_history = []
+        residual_history = []
         
         for iteration in range(self.max_iterations):
             # Calcular iteração Jacobi padrão
@@ -78,17 +79,22 @@ class JacobiOrder2Solver(LinearSolver):
                         self.omega2 * x + 
                         self.omega3 * x_prev)
             
-            # Calcular erro e verificar convergência
+            # Calcular erro e resíduo
             error = np.linalg.norm(x_new - x, ord=np.inf)
+            residual = np.linalg.norm(A @ x_new - b)
+            
             self.convergence_history.append(error)
+            residual_history.append(residual)
             
             if self._check_convergence(x_new, x):
                 info = {
                     'converged': True,
                     'iterations': iteration + 1,
                     'final_error': error,
+                    'final_residual': residual,
                     'method': self.get_method_name(),
                     'convergence_history': self.convergence_history.copy(),
+                    'residual_history': residual_history.copy(),
                     'parameters': {'omega1': self.omega1, 'omega2': self.omega2, 'omega3': self.omega3}
                 }
                 return x_new.copy(), info
@@ -96,12 +102,15 @@ class JacobiOrder2Solver(LinearSolver):
             # Atualizar para próxima iteração
             x_prev, x = x, x_new
         
+        final_residual = np.linalg.norm(A @ x - b)
         info = {
             'converged': False,
             'iterations': self.max_iterations,
             'final_error': self.convergence_history[-1],
+            'final_residual': final_residual,
             'method': self.get_method_name(),
             'convergence_history': self.convergence_history.copy(),
+            'residual_history': residual_history.copy(),
             'parameters': {'omega1': self.omega1, 'omega2': self.omega2, 'omega3': self.omega3}
         }
         return x.copy(), info

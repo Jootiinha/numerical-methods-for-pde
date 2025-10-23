@@ -24,7 +24,7 @@ class ConjugateGradientSolver(LinearSolver):
        - pₖ₊₁ = rₖ₊₁ + βₖpₖ
     """
     
-    def __init__(self, tolerance: float = 1e-6, max_iterations: int = 1000,
+    def __init__(self, tolerance: float = 1e-4, max_iterations: int = 1000,
                  check_symmetric: bool = True, check_positive_definite: bool = True):
         """
         Inicializa o método do Gradiente Conjugado.

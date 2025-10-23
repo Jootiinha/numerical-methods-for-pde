@@ -14,12 +14,12 @@ class LinearSolver(ABC):
     Define a interface comum que todos os resolvedores devem implementar.
     """
     
-    def __init__(self, tolerance: float = 1e-6, max_iterations: int = 1000):
+    def __init__(self, tolerance: float = 1e-4, max_iterations: int = 1000):
         """
         Inicializa o resolvedor.
         
         Args:
-            tolerance: Tolerância para critério de convergência
+            tolerance: Tolerância para critério de convergência (padrão: 1e-4 = 10^(-4))
             max_iterations: Número máximo de iterações
         """
         self.tolerance = tolerance

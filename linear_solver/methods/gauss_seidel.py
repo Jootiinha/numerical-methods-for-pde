@@ -45,6 +45,7 @@ class GaussSeidelSolver(LinearSolver):
         x = self._get_initial_guess(A, x0)
         
         self.convergence_history = []
+        residual_history = []
         
         for iteration in range(self.max_iterations):
             x_old = x.copy()
@@ -58,26 +59,34 @@ class GaussSeidelSolver(LinearSolver):
                 
                 x[i] = (b[i] - sum_lower - sum_upper) / A[i, i]
             
-            # Calcular erro e verificar convergência
+            # Calcular erro e resíduo
             error = np.linalg.norm(x - x_old, ord=np.inf)
+            residual = np.linalg.norm(A @ x - b)
+            
             self.convergence_history.append(error)
+            residual_history.append(residual)
             
             if self._check_convergence(x, x_old):
                 info = {
                     'converged': True,
                     'iterations': iteration + 1,
                     'final_error': error,
+                    'final_residual': residual,
                     'method': self.get_method_name(),
-                    'convergence_history': self.convergence_history.copy()
+                    'convergence_history': self.convergence_history.copy(),
+                    'residual_history': residual_history.copy()
                 }
                 return x.copy(), info
         
         # Não convergiu
+        final_residual = np.linalg.norm(A @ x - b)
         info = {
             'converged': False,
             'iterations': self.max_iterations,
             'final_error': self.convergence_history[-1],
+            'final_residual': final_residual,
             'method': self.get_method_name(),
-            'convergence_history': self.convergence_history.copy()
+            'convergence_history': self.convergence_history.copy(),
+            'residual_history': residual_history.copy()
         }
         return x.copy(), info
