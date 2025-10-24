@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Aplicação principal para resolver sistemas lineares usando dados da pasta ./data/
+Aplicação principal para resolver sistemas lineares e não lineares.
 
-Este script processa todos os sistemas lineares disponíveis na pasta data/
-e os resolve usando métodos numéricos selecionados via argumentos de linha de comando.
+Este script processa sistemas lineares da pasta data/ ou resolve sistemas não lineares específicos
+usando métodos numéricos selecionados via argumentos de linha de comando.
 
 Exemplos de uso:
-    python main.py --all                    # Todos os métodos
+    # Sistemas lineares
+    python main.py --all                    # Todos os métodos lineares
     python main.py --jacobi                 # Apenas Jacobi
     python main.py --jacobi --gauss-seidel  # Jacobi e Gauss-Seidel
     python main.py --conjugate-gradient     # Apenas Gradiente Conjugado
@@ -15,6 +16,10 @@ Exemplos de uso:
     python main.py --benchmark              # Modo benchmark (múltiplas rodadas)
     python main.py --benchmark --visualize-benchmark  # Benchmark com visualizações avançadas
     python main.py --all --save-solutions --clear-old-data  # Execução completa
+    
+    # Sistemas não lineares
+    python main.py --nonlinear              # Resolver sistema não linear específico
+    python main.py --nonlinear --tolerance 1e-8  # Com tolerância personalizada
 """
 
 import argparse
@@ -34,6 +39,13 @@ from linear_solver import (
     PreconditionedConjugateGradientSolver,
     CSVMatrixLoader, MatrixValidator
 )
+
+# Importar resolvedores não lineares (opcional - só quando necessário)
+try:
+    from nonlinear_solver import NewtonSolver, IterationSolver, GradientSolver
+    HAS_NONLINEAR = True
+except ImportError:
+    HAS_NONLINEAR = False
 
 # Importar matplotlib apenas se necessário
 try:
@@ -1278,17 +1290,25 @@ Exemplos:
     parser.add_argument('--visualize-benchmark', action='store_true',
                        help='Gerar visualizações avançadas do benchmark (requer --benchmark)')
     
+    # Sistemas não lineares
+    parser.add_argument('--nonlinear', action='store_true',
+                       help='Resolver sistema não linear específico usando Newton, Iteração e Gradiente')
+    
     args = parser.parse_args()
     
     # Validar dependências de argumentos
     if args.visualize_benchmark and not args.benchmark:
         parser.error("--visualize-benchmark requer --benchmark")
     
-    # Se nenhum método foi especificado, usar --all
-    if not any([args.all, args.jacobi, args.gauss_seidel, args.conjugate_gradient,
-                args.jacobi_order2, args.gauss_seidel_order2, args.preconditioned_cg]):
+    # Se nenhum método foi especificado E não é sistema não linear, usar --all
+    if not args.nonlinear and not any([args.all, args.jacobi, args.gauss_seidel, args.conjugate_gradient,
+                                      args.jacobi_order2, args.gauss_seidel_order2, args.preconditioned_cg]):
         print("⚠️  Nenhum método especificado. Usando --all por padrão.")
         args.all = True
+    
+    # Validar sistemas não lineares
+    if args.nonlinear and not HAS_NONLINEAR:
+        parser.error("Módulo nonlinear_solver não encontrado. Verifique se foi instalado corretamente.")
     
     return args
 
@@ -1772,6 +1792,45 @@ def create_summary_report(sistemas_processados, args):
     print(f"📋 Relatório de execução salvo: {summary_file}")
 
 
+def solve_nonlinear_system(tolerance: float = 1e-6, max_iterations: int = 1000):
+    """
+    Resolve o sistema não linear específico.
+    
+    Sistema:
+        F₁: (x-1)² + (y-1)² + (z-1)² - 1 = 0
+        F₂: 2x² + (y-1)² - 4z = 0  
+        F₃: 3x² + 2z² - 4y = 0
+    """
+    print("\n🔬 RESOLVEDOR DE SISTEMAS NÃO LINEARES")
+    print("=" * 60)
+    print("📝 Sistema de equações:")
+    print("   F₁: (x-1)² + (y-1)² + (z-1)² = 1")
+    print("   F₂: 2x² + (y-1)² = 4z")
+    print("   F₃: 3x² + 2z² = 4y")
+    print("=" * 60)
+    
+    # Importar e executar exemplo não linear
+    try:
+        from nonlinear_example import NonLinearSystemExample
+        
+        example = NonLinearSystemExample()
+        
+        # Executar com a tolerância especificada
+        results = example.run_all_methods(
+            tolerance=tolerance, 
+            max_iterations=max_iterations
+        )
+        
+        print(f"\n✅ Sistema não linear processado com sucesso!")
+        print(f"📁 Resultados salvos em: ./results/nonlinear/")
+        
+        return True
+        
+    except Exception as e:
+        print(f"\n❌ Erro ao resolver sistema não linear: {e}")
+        return False
+
+
 def main():
     """Função principal da aplicação."""
     
@@ -1795,6 +1854,18 @@ def main():
     # Limpar dados anteriores se solicitado
     if args.clear_old_data:
         clear_old_results()
+    
+    # Se sistema não linear foi solicitado, resolver e sair
+    if args.nonlinear:
+        success = solve_nonlinear_system(
+            tolerance=args.tolerance,
+            max_iterations=args.max_iterations
+        )
+        if success:
+            print("\n🎉 Processamento concluído com sucesso!")
+        else:
+            print("\n❌ Falha no processamento.")
+        return
     
     # Mostrar métodos selecionados (apenas no modo normal)
     if not args.benchmark:
