@@ -444,8 +444,8 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 ## 👨‍💻 Autor
 
 **João Monteiro**  
-📧 joao.monteiro@example.com  
-🔗 [GitHub](https://github.com/joaomonteiro)
+📧 joaocrm@id.uff.br  
+🔗 [GitHub](https://github.com/jootiinha)
 
 ---
 
