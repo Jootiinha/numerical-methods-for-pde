@@ -4,7 +4,7 @@ Utilitário para carregar matrizes e vetores de arquivos CSV.
 
 import csv
 import numpy as np
-from typing import Tuple, Optional, List, Union
+from typing import Tuple, List, Union
 from pathlib import Path
 
 

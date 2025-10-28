@@ -2,16 +2,10 @@ import numpy as np
 from pathlib import Path
 import time
 from typing import Dict, Any, List
-from nonlinear_solver import (
+from src.nonlinear_solver.methods import (
     NewtonSolver, IterationSolver, GradientSolver
 )
-
-# Tenta importar o matplotlib para verificar a disponibilidade
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+import matplotlib.pyplot as plt
 
 class NonLinearSystemExample:
     """
@@ -288,9 +282,6 @@ class NonLinearSystemExample:
     
     def _create_visualizations(self, results: Dict[str, Any]):
         """Cria visualizações dos resultados."""
-        if not HAS_MATPLOTLIB:
-            print("⚠️  Matplotlib não disponível. Pulando visualizações.")
-            return
             
         try:
             # Gráfico de convergência

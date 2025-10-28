@@ -1,13 +1,6 @@
 import numpy as np
 from pathlib import Path
-from linear_solver.utils.csv_loader import CSVMatrixLoader
-
-# Tenta importar o matplotlib para verificar a disponibilidade
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+from src.linear_solver.utils.csv_loader import CSVMatrixLoader
 
 def clear_old_results():
     """Limpa resultados anteriores das pastas de output."""
@@ -292,7 +285,7 @@ def create_summary_report(sistemas_processados, args):
         f.write("-" * 30 + "\n")
         f.write(f"Tolerância: {args.tolerance}\n")
         f.write(f"Máximo de iterações: {args.max_iterations}\n")
-        f.write(f"Gráficos habilitados: {'Não' if args.no_plots else 'Sim' if HAS_MATPLOTLIB else 'Matplotlib indisponível'}\n")
+        f.write(f"Gráficos habilitados: {'Não' if args.no_plots else 'Sim'}\n")
         f.write(f"Salvar soluções: {'Sim' if args.save_solutions else 'Não'}\n")
         f.write(f"Análise de condicionamento: {'Desabilitada' if args.skip_conditioning else 'Habilitada'}\n")
         f.write(f"Dados anteriores limpos: {'Sim' if args.clear_old_data else 'Não'}\n")

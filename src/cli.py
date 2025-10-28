@@ -1,27 +1,20 @@
 import argparse
 
-# Tenta importar o módulo não linear para verificar a disponibilidade
-try:
-    import nonlinear_solver
-    HAS_NONLINEAR = True
-except ImportError:
-    HAS_NONLINEAR = False
-
 def parse_arguments():
     """Parse argumentos da linha de comando."""
     
     parser = argparse.ArgumentParser(
         description="Resolver sistemas lineares usando métodos iterativos",
         epilog="""
-Exemplos:
-  %(prog)s --all                      # Todos os métodos disponíveis
-  %(prog)s --jacobi                   # Apenas método de Jacobi
-  %(prog)s --jacobi --gauss-seidel    # Jacobi e Gauss-Seidel
-  %(prog)s --conjugate-gradient       # Apenas Gradiente Conjugado
-  %(prog)s --jacobi-order2            # Jacobi de segunda ordem
-  %(prog)s --no-plots                 # Executar sem gráficos
-  %(prog)s --clear-old-data           # Limpar resultados anteriores
-  %(prog)s --all --save-solutions --clear-old-data # Execução completa limpa
+            Exemplos:
+                %(prog)s --all                      # Todos os métodos disponíveis
+                %(prog)s --jacobi                   # Apenas método de Jacobi
+                %(prog)s --jacobi --gauss-seidel    # Jacobi e Gauss-Seidel
+                %(prog)s --conjugate-gradient       # Apenas Gradiente Conjugado
+                %(prog)s --jacobi-order2            # Jacobi de segunda ordem
+                %(prog)s --no-plots                 # Executar sem gráficos
+                %(prog)s --clear-old-data           # Limpar resultados anteriores
+                %(prog)s --all --save-solutions --clear-old-data # Execução completa limpa
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -90,7 +83,7 @@ Exemplos:
         args.all = True
     
     # Validar sistemas não lineares
-    if args.nonlinear and not HAS_NONLINEAR:
+    if args.nonlinear:
         parser.error("Módulo nonlinear_solver não encontrado. Verifique se foi instalado corretamente.")
     
     return args

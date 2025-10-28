@@ -3,19 +3,14 @@ from pathlib import Path
 from typing import Dict, Tuple
 import time
 import statistics
-from linear_solver import (
+from src.linear_solver.methods import (
     JacobiSolver, GaussSeidelSolver, ConjugateGradientSolver,
     JacobiOrder2Solver, GaussSeidelOrder2Solver,
-    PreconditionedConjugateGradientSolver,
-    MatrixValidator
+    PreconditionedConjugateGradientSolver
 )
+from src.linear_solver.utils.matrix_validator import MatrixValidator
 
-# Tenta importar o matplotlib para verificar a disponibilidade
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+import matplotlib.pyplot as plt
 
 class BenchmarkResult:
     """Classe para armazenar resultados do benchmark."""
@@ -352,10 +347,6 @@ class MethodBenchmark:
 
 def create_benchmark_visualizations(benchmark_data: Dict, matrix_name: str):
     """Cria todas as visualizações do benchmark."""
-    
-    if not HAS_MATPLOTLIB:
-        print("⚠️  Matplotlib não disponível - pulando visualizações do benchmark")
-        return
     
     print(f"\n📊 GERANDO VISUALIZAÇÕES DO BENCHMARK PARA: {matrix_name}")
     print("-" * 60)

@@ -1,7 +1,7 @@
 import numpy as np
 from pathlib import Path
 from typing import Dict
-from linear_solver.utils.matrix_validator import MatrixValidator
+from src.linear_solver.utils.matrix_validator import MatrixValidator
 
 def calcular_matriz_iteracao_jacobi(A: np.ndarray) -> np.ndarray:
     """Calcula a matriz de iteração do método de Jacobi."""

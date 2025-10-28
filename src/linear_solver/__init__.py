@@ -10,7 +10,7 @@ Métodos implementados:
 """
 
 __version__ = "1.0.0"
-__author__ = "João Monteiro"
+__author__ = "João Monteiro - joaocrm@id.uff.br"
 
 from .base import LinearSolver
 from .methods import (

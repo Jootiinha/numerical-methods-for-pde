@@ -1,18 +1,12 @@
 import numpy as np
 from pathlib import Path
-from linear_solver import (
+from src.linear_solver.methods import (
     JacobiSolver, GaussSeidelSolver, ConjugateGradientSolver,
     JacobiOrder2Solver, GaussSeidelOrder2Solver,
-    PreconditionedConjugateGradientSolver,
-    MatrixValidator
+    PreconditionedConjugateGradientSolver
 )
-
-# Tenta importar o matplotlib para verificar a disponibilidade
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+from src.linear_solver.utils.matrix_validator import MatrixValidator
+import matplotlib.pyplot as plt
 
 def build_methods_list(args, analysis):
     """Constrói a lista de métodos baseada nos argumentos fornecidos."""
@@ -159,10 +153,6 @@ def compare_solutions(solutions, A, b):
 
 def plot_convergence_comparison(results, matrix_name):
     """Plota comparação de convergência dos métodos."""
-    
-    if not HAS_MATPLOTLIB:
-        print("⚠️  Matplotlib não disponível - pulando gráficos")
-        return
     
     plt.figure(figsize=(14, 10))
     

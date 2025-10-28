@@ -4,37 +4,25 @@ Aplicação principal para resolver sistemas lineares e não lineares.
 """
 import warnings
 from pathlib import Path
-
-# Adiciona o diretório src ao sys.path para permitir importações diretas
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent / 'src'))
-
-from cli import parse_arguments
-from utils.files import (
+from src.cli import parse_arguments
+from src.utils.files import (
     clear_old_results,
     descobrir_sistemas_disponiveis,
     carregar_sistema,
     save_solutions,
     create_summary_report
 )
-from analysis.matrix_analyzer import (
+from src.analysis.matrix_analyzer import (
     analyze_matrix_properties,
     analisar_condicionamento_sistema
 )
-from app.linear_solver_app import (
+from src.app.linear_solver_app import (
     solve_with_selected_methods,
     compare_solutions,
     plot_convergence_comparison
 )
-from app.nonlinear_solver_app import solve_nonlinear_system
-from benchmark.main import run_benchmark_mode
-
-# Tenta importar o matplotlib para verificar a disponibilidade
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+from src.app.nonlinear_solver_app import solve_nonlinear_system
+from src.benchmark.main import run_benchmark_mode
 
 warnings.filterwarnings('ignore')
 
@@ -51,11 +39,11 @@ def main():
     print(f"⚙️  Tolerância: {args.tolerance}")
     print(f"⚙️  Máx. iterações: {args.max_iterations}")
     if not args.benchmark:
-        print(f"⚙️  Gráficos: {'Desabilitados' if args.no_plots else 'Habilitados' if HAS_MATPLOTLIB else 'Indisponíveis'}")
+        print(f"⚙️  Gráficos: {'Desabilitados' if args.no_plots else 'Habilitados'}")
         print(f"⚙️  Salvar soluções: {'Sim' if args.save_solutions else 'Não'}")
         print(f"⚙️  Análise condicionamento: {'Desabilitada' if args.skip_conditioning else 'Habilitada'}")
     else:
-        print(f"⚙️  Visualizações benchmark: {'Habilitadas' if args.visualize_benchmark and HAS_MATPLOTLIB else 'Desabilitadas' if not args.visualize_benchmark else 'Matplotlib indisponível'}")
+        print(f"⚙️  Visualizações benchmark: {'Habilitadas' if args.visualize_benchmark else 'Desabilitadas'}")
     print(f"⚙️  Limpar dados anteriores: {'Sim' if args.clear_old_data else 'Não'}")
     
     # Limpar dados anteriores se solicitado
@@ -89,7 +77,7 @@ def main():
         
         print(f"📋 Métodos: {', '.join(selected_methods)}")
     else:
-        print(f"📋 Modo benchmark: Todos os métodos aplicáveis serão testados")
+        print("📋 Modo benchmark: Todos os métodos aplicáveis serão testados")
     
     # Descobrir sistemas disponíveis na pasta data/
     sistemas = descobrir_sistemas_disponiveis()
