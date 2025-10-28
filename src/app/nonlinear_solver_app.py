@@ -190,18 +190,27 @@ class NonLinearSystemExample:
                     # Verificar qualidade da solução
                     f_final = self.system_function(solution)
                     f_norm = np.linalg.norm(f_final)
+                    max_f_abs = np.max(np.abs(f_final))
                     
                     result = {
                         'initial_guess': x0.copy(),
                         'solution': solution.copy(),
                         'function_values': f_final,
                         'function_norm': f_norm,
+                        'max_f_abs': max_f_abs,
                         'converged': info['converged'],
                         'iterations': info['iterations'],
                         'elapsed_time': elapsed_time,
                         'info': info
                     }
                     
+                    if info['converged']:
+                        try:
+                            det_J = np.linalg.det(self.jacobian_function(solution))
+                            result['det_J'] = det_J
+                        except np.linalg.LinAlgError:
+                            result['det_J'] = float('nan') # Singular matrix
+
                     method_results.append(result)
                     
                     # Imprimir resultado
@@ -209,7 +218,15 @@ class NonLinearSystemExample:
                     print(f"  Status: {status}")
                     print(f"  Iterações: {info['iterations']}")
                     print(f"  Solução: [{solution[0]:.6f}, {solution[1]:.6f}, {solution[2]:.6f}]")
-                    print(f"  ||F(x)||: {f_norm:.2e}")
+                    print(f"  Critérios de parada:")
+                    print(f"    ||F(x)||: {f_norm:.2e}")
+                    print(f"    max|Fᵢ(x)|: {max_f_abs:.2e}")
+                    
+                    if info['converged']:
+                        det_J = result.get('det_J', float('nan'))
+                        print(f"  Regularidade da raiz:")
+                        print(f"    det(J(x*)): {det_J:.4f}")
+
                     print(f"  Tempo: {elapsed_time:.4f}s")
                     
                     if method_name == 'Iteracao' and 'best_alpha' in info:
@@ -268,7 +285,15 @@ class NonLinearSystemExample:
                         f.write(f"  Status: {status}\n")
                         f.write(f"  Iterações: {result['info']['iterations']}\n")
                         f.write(f"  Solução: [{result['solution'][0]:.8f}, {result['solution'][1]:.8f}, {result['solution'][2]:.8f}]\n")
-                        f.write(f"  ||F(x)||: {result['function_norm']:.2e}\n")
+                        f.write(f"  Critérios de parada:\n")
+                        f.write(f"    ||F(x)||: {result['function_norm']:.2e}\n")
+                        f.write(f"    max|Fᵢ(x)|: {result['max_f_abs']:.2e}\n")
+                        
+                        if result['converged']:
+                            det_J = result.get('det_J', float('nan'))
+                            f.write(f"  Regularidade da raiz:\n")
+                            f.write(f"    det(J(x*)): {det_J:.4f}\n")
+
                         f.write(f"  Tempo: {result['elapsed_time']:.6f}s\n")
                         
                         # Verificar a solução
