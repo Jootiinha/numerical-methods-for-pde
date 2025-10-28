@@ -42,30 +42,29 @@ make pre-commit-install
 
 ## 🏗️ Estrutura do Projeto
 
+A estrutura do projeto foi refatorada para seguir as boas práticas, centralizando todo o código-fonte no diretório `src`.
+
 ```
 numerical-methods-for-pde/
-├── linear_solver/                  # Código principal da biblioteca
-│   ├── __init__.py                 # Exports públicos
-│   ├── base.py                     # Classe abstrata base
-│   ├── methods/                    # Implementações dos métodos
-│   │   ├── __init__.py
-│   │   ├── jacobi.py               # Método de Jacobi
-│   │   ├── gauss_seidel.py         # Método de Gauss-Seidel
-│   │   ├── jacobi_order2.py        # Jacobi de ordem 2
-│   │   ├── gauss_seidel_order2.py  # Gauss-Seidel de ordem 2
-│   │   ├── conjugate_gradient.py   # Gradiente Conjugado
-│   │   └── preconditioned_cg.py    # Gradiente Conjugado Precondicionado
-│   └── utils/                      # Utilitários
-│       ├── __init__.py
-│       ├── csv_loader.py           # Carregamento de CSV
-│       ├── matrix_validator.py     # Validação de matrizes
-│       └── matrix_generator.py     # Geração de matrizes de teste
-├── tests/                          # Testes
-├── main.py                         # Exemplo principal
-├── pyproject.toml                  # Configuração Poetry e ferramentas
-├── Makefile                        # Comandos automatizados
-├── README.md                       # Documentação principal
-├── DESENVOLVIMENTO.md              # Este arquivo
+├── src/
+│   ├── app/                        # Lógica da aplicação (orquestração)
+│   │   ├── linear_solver_app.py
+│   │   └── nonlinear_solver_app.py
+│   ├── analysis/                   # Módulos de análise (condicionamento, etc.)
+│   │   └── matrix_analyzer.py
+│   ├── benchmark/                  # Código para benchmarking de performance
+│   │   └── main.py
+│   ├── cli.py                      # Definição da interface de linha de comando
+│   ├── linear_solver/              # Pacote principal do solver linear
+│   ├── nonlinear_solver/           # Pacote principal do solver não linear
+│   └── utils/                      # Utilitários gerais
+│       └── files.py
+├── tests/                          # Testes automatizados
+├── data/                           # Dados de entrada (matrizes, vetores)
+├── main.py                         # Ponto de entrada da aplicação
+├── pyproject.toml                  # Configuração do projeto e dependências
+├── Makefile                        # Comandos de automação
+└── DESENVOLVIMENTO.md              # Guia para desenvolvedores
 ```
 
 ## 🧪 Executando Testes
@@ -194,7 +193,7 @@ git push origin feature/nova-funcionalidade
 
 ### 2. Adicionando um Novo Método
 
-1. Criar arquivo na pasta `linear_solver/methods/`
+1. Criar arquivo na pasta `src/linear_solver/methods/`
 2. Herdar de `LinearSolver`
 3. Implementar métodos abstratos
 4. Adicionar ao `__init__.py` do módulo methods
@@ -204,7 +203,7 @@ git push origin feature/nova-funcionalidade
 ### 3. Exemplo: Novo Método SOR
 
 ```python
-# linear_solver/methods/sor.py
+# src/linear_solver/methods/sor.py
 from typing import Tuple, Optional, Dict, Any
 import numpy as np
 from ..base import LinearSolver

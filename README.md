@@ -88,7 +88,43 @@ make lint
 make check
 ```
 
-## 🔧 Uso Básico
+## 🔧 Uso
+
+A aplicação agora é executada através do `main.py`, que oferece uma interface de linha de comando (CLI) para acessar todas as funcionalidades.
+
+### Executando a Aplicação (CLI)
+
+Após a instalação, você pode executar a aplicação diretamente do terminal.
+
+**Resolver todos os sistemas com todos os métodos aplicáveis:**
+```bash
+python main.py --all
+```
+
+**Resolver um sistema específico com métodos selecionados:**
+```bash
+# Usando Jacobi e Gauss-Seidel no sistema brasileiro
+python main.py --jacobi --gauss-seidel --system "Sistema Brasileiro 36x36"
+```
+
+**Executar o modo de benchmark (análise de performance):**
+```bash
+python main.py --benchmark
+```
+
+**Resolver o sistema não linear:**
+```bash
+python main.py --nonlinear
+```
+
+**Ver todas as opções disponíveis:**
+```bash
+python main.py --help
+```
+
+### Uso como Biblioteca
+
+O código também pode ser importado e utilizado como uma biblioteca em outros projetos Python. Os exemplos abaixo demonstram como usar os componentes individuais.
 
 ### 1. Carregando um sistema de arquivo CSV
 
@@ -217,51 +253,40 @@ A_tri, b_tri = MatrixGenerator.tridiagonal_matrix(
 )
 ```
 
-## 📊 Exemplo Completo
+## 📊 Exemplos de Execução
 
-```python
-from linear_solver import *
-import numpy as np
-import matplotlib.pyplot as plt
+Abaixo estão alguns exemplos de como usar a interface de linha de comando.
 
-# 1. Criar arquivo CSV de exemplo
-CSVMatrixLoader.create_example_files("exemplos/")
+### Exemplo 1: Resolver um sistema específico com métodos selecionados
 
-# 2. Carregar sistema
-A, b = CSVMatrixLoader.load_augmented_matrix("exemplos/exemplo_3x3.csv")
+Este comando executa os métodos de Jacobi e Gauss-Seidel no sistema "Sistema Brasileiro 36x36", com uma tolerância de `1e-8` e gera gráficos de convergência.
 
-# 3. Analisar matriz
-analysis = MatrixValidator.analyze_matrix(A)
-print(f"Condição da matriz: {analysis['condition_number']:.2f}")
+```bash
+python main.py --jacobi --gauss-seidel --system "Sistema Brasileiro 36x36" --tolerance 1e-8 --plots
+```
 
-# 4. Resolver com múltiplos métodos
-methods = [
-    ("Jacobi", JacobiSolver()),
-    ("Gauss-Seidel", GaussSeidelSolver()),  
-    ("Gradiente Conjugado", ConjugateGradientSolver()),
-]
+### Exemplo 2: Executar o modo benchmark
 
-results = {}
-for name, solver in methods:
-    try:
-        x, info = solver.solve(A, b)
-        results[name] = info
-        print(f"{name}: {info['iterations']} iterações, erro={info['final_error']:.2e}")
-    except Exception as e:
-        print(f"{name}: Erro - {e}")
+O modo benchmark executa uma análise de performance completa em um sistema, testando múltiplas tolerâncias e salvando relatórios detalhados e gráficos.
 
-# 5. Comparar convergência
-plt.figure(figsize=(12, 8))
-for name, info in results.items():
-    if info['converged']:
-        plt.semilogy(info['convergence_history'], label=name, marker='o')
+```bash
+python main.py --benchmark --system "Hilbert 36x36" --visualize-benchmark
+```
 
-plt.xlabel('Iteração')
-plt.ylabel('Erro (escala log)')
-plt.title('Comparação de Convergência dos Métodos')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.show()
+### Exemplo 3: Resolver o sistema não linear
+
+Este comando executa os métodos de Newton, Iteração e Gradiente para resolver o sistema não linear definido no código.
+
+```bash
+python main.py --nonlinear --tolerance 1e-7
+```
+
+### Exemplo 4: Limpar resultados antigos e executar tudo
+
+Este comando primeiro limpa todos os resultados da pasta `results/` e depois executa todos os métodos em todos os sistemas lineares disponíveis.
+
+```bash
+python main.py --clear-old-data --all
 ```
 
 ## 🔬 Testes
@@ -309,17 +334,29 @@ Para contribuir com o projeto, consulte o [Guia de Desenvolvimento](DESENVOLVIME
 
 ### Estrutura do Projeto
 
+A estrutura do projeto foi organizada para separar o código-fonte (`src`) dos testes e da configuração.
+
 ```
 numerical-methods-for-pde/
-├── linear_solver/           # Código principal
-│   ├── methods/            # Implementações dos métodos
-│   ├── utils/              # Utilitários (CSV, validação, geração)
-│   └── base.py            # Classe abstrata base
-├── tests/                  # Testes automatizados  
-├── main.py                # Exemplo de uso completo
-├── pyproject.toml         # Configuração Poetry + ferramentas
-├── Makefile              # Comandos automatizados
-└── DESENVOLVIMENTO.md    # Guia para desenvolvedores
+├── src/
+│   ├── app/
+│   │   ├── linear_solver_app.py
+│   │   └── nonlinear_solver_app.py
+│   ├── analysis/
+│   │   └── matrix_analyzer.py
+│   ├── benchmark/
+│   │   └── main.py
+│   ├── cli.py
+│   ├── linear_solver/
+│   ├── nonlinear_solver/
+│   └── utils/
+│       └── files.py
+├── tests/
+├── data/
+├── main.py
+├── pyproject.toml
+├── Makefile
+└── README.md
 ```
 
 ## 🤝 Contribuição
