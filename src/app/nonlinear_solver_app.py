@@ -76,38 +76,47 @@ class NonLinearSystemExample:
         
         return J
     
-    def run_all_methods(self, tolerance: float = 1e-6, max_iterations: int = 1000,
-                       initial_guesses: List[np.ndarray] = None) -> Dict[str, Any]:
+    def run_methods(self, args: Any, initial_guesses: List[np.ndarray] = None) -> Dict[str, Any]:
         """
-        Executa todos os métodos para resolver o sistema.
-        
+        Executa os métodos selecionados para resolver o sistema.
+
         Args:
-            tolerance: Tolerância para convergência
-            max_iterations: Número máximo de iterações
-            initial_guesses: Lista de aproximações iniciais para testar
-            
+            args: Argumentos da linha de comando.
+            initial_guesses: Lista de aproximações iniciais para testar.
+
         Returns:
-            Dicionário com resultados de todos os métodos
+            Dicionário com resultados dos métodos executados.
         """
+        tolerance = args.tolerance
+        max_iterations = args.max_iterations
+
         if initial_guesses is None:
-            # Várias aproximações iniciais para testar
             initial_guesses = [
-                np.array([0.0, 0.0, 0.0]),      # Origem
-                np.array([1.0, 1.0, 1.0]),      # Centro da esfera
-                np.array([2.0, 2.0, 2.0]),      # Longe do centro
-                np.array([0.5, 0.5, 0.5]),      # Próximo ao centro
-                np.array([1.5, 1.5, 0.5]),      # Misto
+                np.array([0.0, 0.0, 0.0]),
+                np.array([1.0, 1.0, 1.0]),
+                np.array([2.0, 2.0, 2.0]),
+                np.array([0.5, 0.5, 0.5]),
+                np.array([1.5, 1.5, 0.5]),
             ]
-        
-        # Métodos a serem testados
-        methods = {
+
+        all_methods = {
             'Newton': NewtonSolver(tolerance=tolerance, max_iterations=max_iterations),
             'Iteracao': IterationSolver(tolerance=tolerance, max_iterations=max_iterations),
             'Gradiente': GradientSolver(tolerance=tolerance, max_iterations=max_iterations)
         }
-        
+
+        methods_to_run = {}
+        run_all = not any([args.newton, args.gradient, args.iteration])
+
+        if run_all or args.newton:
+            methods_to_run['Newton'] = all_methods['Newton']
+        if run_all or args.iteration:
+            methods_to_run['Iteracao'] = all_methods['Iteracao']
+        if run_all or args.gradient:
+            methods_to_run['Gradiente'] = all_methods['Gradiente']
+
         results = {}
-        
+
         print(f"\n{'='*70}")
         print(f"RESOLUÇÃO DO SISTEMA NÃO LINEAR")
         print(f"{'='*70}")
@@ -116,11 +125,12 @@ class NonLinearSystemExample:
         print(f"  F₂: 2x² + (y-1)² - 4z = 0")
         print(f"  F₃: 3x² + 2z² - 4y = 0")
         print(f"")
+        print(f"Métodos a executar: {', '.join(methods_to_run.keys())}")
         print(f"Tolerância: {tolerance}")
         print(f"Máximo de iterações: {max_iterations}")
         print(f"{'='*70}\n")
-        
-        for method_name, solver in methods.items():
+
+        for method_name, solver in methods_to_run.items():
             print(f"\n{'-'*50}")
             print(f"MÉTODO: {method_name.upper()}")
             print(f"{'-'*50}")
@@ -362,32 +372,19 @@ class NonLinearSystemExample:
             print(f"⚠️  Erro ao criar visualizações: {e}")
 
 
-def solve_nonlinear_system(tolerance: float = 1e-6, max_iterations: int = 1000):
+def solve_nonlinear_system(args: Any):
     """
-    Resolve o sistema não linear específico.
-    
-    Sistema:
-        F₁: (x-1)² + (y-1)² + (z-1)² - 1 = 0
-        F₂: 2x² + (y-1)² - 4z = 0  
-        F₃: 3x² + 2z² = 4y = 0
+    Resolve o sistema não linear específico com base nos argumentos fornecidos.
     """
     print("\n🔬 RESOLVEDOR DE SISTEMAS NÃO LINEARES")
-    print("=" * 60)
-    print("📝 Sistema de equações:")
-    print("   F₁: (x-1)² + (y-1)² + (z-1)² = 1")
-    print("   F₂: 2x² + (y-1)² = 4z")
-    print("   F₃: 3x² + 2z² = 4y")
     print("=" * 60)
     
     # Executar exemplo não linear
     try:
         example = NonLinearSystemExample()
         
-        # Executar com a tolerância especificada
-        example.run_all_methods(
-            tolerance=tolerance, 
-            max_iterations=max_iterations
-        )
+        # Executar com os argumentos da CLI
+        example.run_methods(args)
         
         print(f"\n✅ Sistema não linear processado com sucesso!")
         print(f"📁 Resultados salvos em: ./results/nonlinear/")

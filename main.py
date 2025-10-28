@@ -85,7 +85,7 @@ def main():
         clear_old_results()
 
     if args.nonlinear:
-        if solve_nonlinear_system(tolerance=args.tolerance, max_iterations=args.max_iterations):
+        if solve_nonlinear_system(args):
             print("\n🎉 Processamento não linear concluído com sucesso!")
         else:
             print("\n❌ Falha no processamento não linear.")

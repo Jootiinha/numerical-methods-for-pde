@@ -57,14 +57,26 @@ def parse_arguments():
                        help='Gerar visualizações avançadas do benchmark (requer --benchmark)')
     
     # Sistemas não lineares
-    parser.add_argument('--nonlinear', action='store_true',
-                       help='Resolver sistema não linear específico usando Newton, Iteração e Gradiente')
-    
+    nonlinear_group = parser.add_argument_group('Seleção de Métodos Não Lineares')
+    nonlinear_group.add_argument('--nonlinear', action='store_true',
+                                 help='Ativar solucionadores para sistemas não lineares. Use sozinho para rodar todos os métodos não lineares.')
+    nonlinear_group.add_argument('--newton', action='store_true',
+                                 help='Executar método de Newton (requer --nonlinear)')
+    nonlinear_group.add_argument('--gradient', action='store_true',
+                                 help='Executar método do Gradiente (requer --nonlinear)')
+    nonlinear_group.add_argument('--iteration', action='store_true',
+                                 help='Executar método de Iteração (requer --nonlinear)')
+
     args = parser.parse_args()
     
     # Validar dependências de argumentos
     if args.visualize_benchmark and not args.benchmark:
         parser.error("--visualize-benchmark requer --benchmark")
+
+    # Validar dependências de argumentos não lineares
+    is_nonlinear_method_selected = any([args.newton, args.gradient, args.iteration])
+    if is_nonlinear_method_selected and not args.nonlinear:
+        parser.error("Argumentos como --newton, --gradient e --iteration requerem --nonlinear")
     
     # Se nenhum método foi especificado (e não é benchmark ou não linear), usar --all
     is_method_selected = any([
