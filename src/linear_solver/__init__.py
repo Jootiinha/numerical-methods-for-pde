@@ -13,18 +13,20 @@ __author__ = "João Monteiro - joaocrm@id.uff.br"
 
 from .base import LinearSolver
 from .methods import (
-    JacobiSolver, GaussSeidelSolver,
-    ConjugateGradientSolver, PreconditionedConjugateGradientSolver
+    ConjugateGradientSolver,
+    GaussSeidelSolver,
+    JacobiSolver,
+    PreconditionedConjugateGradientSolver,
 )
-from .utils import CSVMatrixLoader, MatrixValidator, MatrixGenerator
+from .utils import CSVMatrixLoader, MatrixGenerator, MatrixValidator
 
 __all__ = [
-    'LinearSolver',
-    'JacobiSolver',
-    'GaussSeidelSolver',
-    'ConjugateGradientSolver',
-    'PreconditionedConjugateGradientSolver',
-    'CSVMatrixLoader',
-    'MatrixValidator',
-    'MatrixGenerator'
+    "LinearSolver",
+    "JacobiSolver",
+    "GaussSeidelSolver",
+    "ConjugateGradientSolver",
+    "PreconditionedConjugateGradientSolver",
+    "CSVMatrixLoader",
+    "MatrixValidator",
+    "MatrixGenerator",
 ]

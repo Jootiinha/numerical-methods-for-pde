@@ -4,31 +4,37 @@ Aplicação principal para resolver sistemas lineares e não lineares.
 """
 import warnings
 from pathlib import Path
-from src.cli import parse_arguments
-from src.utils.files import (
-    clear_old_results,
-    descobrir_sistemas_disponiveis,
-    carregar_sistema,
-    save_solutions,
-    create_summary_report
-)
+
 from src.analysis.matrix_analyzer import (
+    analisar_condicionamento_sistema,
     analyze_matrix_properties,
-    analisar_condicionamento_sistema
 )
 from src.app.linear_solver_app import (
-    solve_with_selected_methods,
     compare_solutions,
-    plot_convergence_comparison
+    plot_convergence_comparison,
+    solve_with_selected_methods,
 )
 from src.app.nonlinear_solver_app import solve_nonlinear_system
 from src.benchmark.main import run_benchmark_mode
+from src.cli import parse_arguments
+from src.utils.files import (
+    carregar_sistema,
+    clear_old_results,
+    create_summary_report,
+    descobrir_sistemas_disponiveis,
+    save_solutions,
+)
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
+
 
 def _print_execution_summary(args):
     """Imprime um resumo dos parâmetros de execução."""
-    title = "BENCHMARK DE TEMPO DOS MÉTODOS" if args.benchmark else "ANÁLISE DE SISTEMAS REAIS"
+    title = (
+        "BENCHMARK DE TEMPO DOS MÉTODOS"
+        if args.benchmark
+        else "ANÁLISE DE SISTEMAS REAIS"
+    )
     print(f"🔬 LINEAR SOLVER - {title}")
     print("=" * 60)
     print(f"⚙️  Modo: {'BENCHMARK' if args.benchmark else 'ANÁLISE NORMAL'}")
@@ -37,11 +43,16 @@ def _print_execution_summary(args):
     if not args.benchmark:
         print(f"⚙️  Gráficos: {'Desabilitados' if args.no_plots else 'Habilitados'}")
         print(f"⚙️  Salvar soluções: {'Sim' if args.save_solutions else 'Não'}")
-        print(f"⚙️  Análise condicionamento: {'Desabilitada' if args.skip_conditioning else 'Habilitada'}")
+        print(
+            f"⚙️  Análise condicionamento: {'Desabilitada' if args.skip_conditioning else 'Habilitada'}"
+        )
     else:
-        print(f"⚙️  Visualizações benchmark: {'Habilitadas' if args.visualize_benchmark else 'Desabilitadas'}")
+        print(
+            f"⚙️  Visualizações benchmark: {'Habilitadas' if args.visualize_benchmark else 'Desabilitadas'}"
+        )
     print(f"⚙️  Limpar dados anteriores: {'Sim' if args.clear_old_data else 'Não'}")
     print("=" * 60)
+
 
 def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
     """Carrega e processa um único sistema linear."""
@@ -66,7 +77,11 @@ def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
             save_solutions(solutions, A, b, nome, args)
 
             if not args.no_plots:
-                converged_results = {name: info for name, info in results.items() if info and info.get('converged')}
+                converged_results = {
+                    name: info
+                    for name, info in results.items()
+                    if info and info.get("converged")
+                }
                 if converged_results:
                     plot_convergence_comparison(converged_results, nome)
                 else:
@@ -75,6 +90,7 @@ def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
     except Exception as e:
         print(f"💥 Erro ao processar {nome}: {str(e)}")
         return False
+
 
 def main():
     """Função principal da aplicação."""
@@ -112,8 +128,10 @@ def main():
     results_dir = Path("results")
     if results_dir.exists():
         print(f"📁 Resultados organizados em: {results_dir.absolute()}")
-    
-    print(f"✅ {len(sistemas_processados)}/{len(sistemas)} sistemas processados com sucesso")
+
+    print(
+        f"✅ {len(sistemas_processados)}/{len(sistemas)} sistemas processados com sucesso"
+    )
 
 
 if __name__ == "__main__":

@@ -2,8 +2,10 @@
 Método iterativo de Jacobi para resolução de sistemas lineares.
 """
 
-from typing import Tuple, Optional, Dict, Any
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
+
 from ..base import LinearSolver
 
 
@@ -19,8 +21,14 @@ class JacobiSolver(LinearSolver):
     Fórmula de ordem 2: x_new = ω₁*x_jacobi + ω₂*x_old + ω₃*x_older
     """
 
-    def __init__(self, tolerance: float = 1e-4, max_iterations: int = 1000,
-                 omega1: float = 1.0, omega2: float = 0.0, omega3: float = 0.0):
+    def __init__(
+        self,
+        tolerance: float = 1e-4,
+        max_iterations: int = 1000,
+        omega1: float = 1.0,
+        omega2: float = 0.0,
+        omega3: float = 0.0,
+    ):
         """
         Inicializa o método Jacobi.
 
@@ -42,13 +50,14 @@ class JacobiSolver(LinearSolver):
             return "Jacobi"
         return f"Jacobi Ordem 2 (ω₁={self.omega1:.2f}, ω₂={self.omega2:.2f}, ω₃={self.omega3:.2f})"
 
-    def solve(self, A: np.ndarray, b: np.ndarray,
-              x0: Optional[np.ndarray] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def solve(
+        self, A: np.ndarray, b: np.ndarray, x0: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """
         Resolve o sistema usando o método de Jacobi (ou Jacobi Ordem 2).
         """
         self._validate_inputs(A, b)
-        
+
         diagonal_values = np.diag(A)
         if np.any(np.abs(diagonal_values) < 1e-14):
             raise ValueError("Matriz A deve ter diagonal principal não-nula")
@@ -71,7 +80,9 @@ class JacobiSolver(LinearSolver):
                 if iteration == 0:
                     x_new = x_jacobi
                 else:
-                    x_new = self.omega1 * x_jacobi + self.omega2 * x + self.omega3 * x_prev
+                    x_new = (
+                        self.omega1 * x_jacobi + self.omega2 * x + self.omega3 * x_prev
+                    )
             else:
                 x_new = x_jacobi
 
@@ -88,7 +99,7 @@ class JacobiSolver(LinearSolver):
                     solution=x_new,
                     final_error=error,
                     final_residual=residual,
-                    residual_history=residual_history
+                    residual_history=residual_history,
                 )
 
             x_prev, x = x, x_new
@@ -100,23 +111,34 @@ class JacobiSolver(LinearSolver):
             solution=x,
             final_error=self.convergence_history[-1],
             final_residual=final_residual,
-            residual_history=residual_history
+            residual_history=residual_history,
         )
 
-    def _create_convergence_info(self, converged: bool, iterations: int, solution: np.ndarray,
-                                 final_error: float, final_residual: float, residual_history: list) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def _create_convergence_info(
+        self,
+        converged: bool,
+        iterations: int,
+        solution: np.ndarray,
+        final_error: float,
+        final_residual: float,
+        residual_history: list,
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         info = {
-            'converged': converged,
-            'iterations': iterations,
-            'final_error': final_error,
-            'final_residual': final_residual,
-            'method': self.get_method_name(),
-            'convergence_history': self.convergence_history.copy(),
-            'residual_history': residual_history.copy()
+            "converged": converged,
+            "iterations": iterations,
+            "final_error": final_error,
+            "final_residual": final_residual,
+            "method": self.get_method_name(),
+            "convergence_history": self.convergence_history.copy(),
+            "residual_history": residual_history.copy(),
         }
         if self.is_order2:
-            info['parameters'] = {'omega1': self.omega1, 'omega2': self.omega2, 'omega3': self.omega3}
-            
+            info["parameters"] = {
+                "omega1": self.omega1,
+                "omega2": self.omega2,
+                "omega3": self.omega3,
+            }
+
         return solution.copy(), info
 
     def get_iteration_matrix(self, A: np.ndarray) -> np.ndarray:
@@ -124,15 +146,19 @@ class JacobiSolver(LinearSolver):
         diagonal_values = np.diag(A)
         if np.any(np.abs(diagonal_values) < 1e-14):
             raise ValueError("Matriz A deve ter diagonal principal não-nula")
-            
+
         D_inv = np.diag(1 / diagonal_values)
         L_plus_U = A - np.diag(diagonal_values)
-        
+
         M_jacobi = -D_inv @ L_plus_U
-        
+
         if self.is_order2:
             # Para ordem 2, a "matriz de iteração" não é fixa, mas esta é uma aproximação linear
             I = np.eye(A.shape[0])
-            return self.omega1 * M_jacobi + self.omega2 * I + self.omega3 * np.linalg.matrix_power(M_jacobi, 2)
-            
+            return (
+                self.omega1 * M_jacobi
+                + self.omega2 * I
+                + self.omega3 * np.linalg.matrix_power(M_jacobi, 2)
+            )
+
         return M_jacobi

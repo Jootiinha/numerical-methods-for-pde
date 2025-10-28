@@ -34,16 +34,16 @@ test-fast: ## Executar testes rápidos (sem marcador 'slow')
 	$(PYTEST) tests/ -v -m "not slow"
 
 lint: ## Executar verificações de código (flake8, mypy)
-	$(FLAKE8) linear_solver/ tests/
-	$(MYPY) linear_solver/
+	$(FLAKE8) src/linear_solver/ tests/
+	$(MYPY) src/linear_solver/
 
 format: ## Formatar código (black + isort)
-	$(BLACK) linear_solver/ tests/ main.py
-	$(ISORT) linear_solver/ tests/ main.py
+	$(BLACK) src/linear_solver/ tests/ main.py
+	$(ISORT) src/linear_solver/ tests/ main.py
 
 format-check: ## Verificar formatação sem modificar
-	$(BLACK) --check linear_solver/ tests/ main.py
-	$(ISORT) --check-only linear_solver/ tests/ main.py
+	$(BLACK) --check src/linear_solver/ tests/ main.py
+	$(ISORT) --check-only src/linear_solver/ tests/ main.py
 
 clean: ## Limpar arquivos temporários
 	find . -type f -name "*.pyc" -delete
@@ -88,9 +88,9 @@ ci-test: ## Executar testes para CI
 	$(PYTEST) tests/ --cov=linear_solver --cov-report=xml
 
 ci-lint: ## Verificações para CI
-	$(FLAKE8) linear_solver/ tests/
-	$(BLACK) --check linear_solver/ tests/ main.py
-	$(ISORT) --check-only linear_solver/ tests/ main.py
+	$(FLAKE8) src/linear_solver/ tests/
+	$(BLACK) --check src/linear_solver/ tests/ main.py
+	$(ISORT) --check-only src/linear_solver/ tests/ main.py
 
 # Utilitários
 show-deps: ## Mostrar árvore de dependências

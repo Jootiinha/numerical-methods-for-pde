@@ -2,9 +2,10 @@
 Configuração e fixtures compartilhadas para os testes.
 """
 
-import pytest
-import numpy as np
 from typing import Tuple
+
+import numpy as np
+import pytest
 
 
 @pytest.fixture
