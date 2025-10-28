@@ -229,7 +229,8 @@ class MethodBenchmark:
         
         # Nome do arquivo
         nome_sistema = matrix_name.lower().replace(" ", "_").replace("(", "").replace(")", "")
-        report_file = results_dir / f"benchmark_timing_{nome_sistema}_tol_{self.tolerance:.0e}".replace("-", "neg") + ".txt"
+        filename = f"benchmark_timing_{nome_sistema}_tol_{self.tolerance:.0e}.txt".replace("-", "neg")
+        report_file = results_dir / filename
         
         with open(report_file, 'w', encoding='utf-8') as f:
             f.write("=" * 80 + "\n")

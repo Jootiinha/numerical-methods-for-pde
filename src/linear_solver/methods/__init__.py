@@ -2,6 +2,7 @@
 Métodos para resolução de sistemas lineares.
 """
 
+from .cgs import CGSSolver
 from .conjugate_gradient import ConjugateGradientSolver
 from .gauss_seidel import GaussSeidelSolver
 from .jacobi import JacobiSolver
@@ -12,4 +13,5 @@ __all__ = [
     "GaussSeidelSolver",
     "ConjugateGradientSolver",
     "PreconditionedConjugateGradientSolver",
+    "CGSSolver",
 ]

@@ -3,7 +3,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from src.linear_solver.methods import (
     JacobiSolver, GaussSeidelSolver, ConjugateGradientSolver,
-    PreconditionedConjugateGradientSolver
+    PreconditionedConjugateGradientSolver, CGSSolver
 )
 from src.linear_solver.utils.matrix_validator import MatrixValidator
 
@@ -15,6 +15,7 @@ def build_methods_list(args, analysis):
         'gauss_seidel': (GaussSeidelSolver, {}),
         'sor': (GaussSeidelSolver, {'relaxation_factor': 1.25}), # Exemplo de SOR
         'conjugate_gradient': (ConjugateGradientSolver, {}),
+        'cgs': (CGSSolver, {}),
         'preconditioned_cg': (PreconditionedConjugateGradientSolver, {})
     }
     

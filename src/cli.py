@@ -28,8 +28,14 @@ def parse_arguments():
                               help='Executar método de Gauss-Seidel')
     method_group.add_argument('--conjugate-gradient', action='store_true',
                               help='Executar Gradiente Conjugado (para matrizes simétricas pos-def)')
+    method_group.add_argument('--cgs', action='store_true',
+                              help='Executar Gradiente Conjugado Quadrado (CGS) (para matrizes não simétricas)')
     method_group.add_argument('--preconditioned-cg', action='store_true',
                               help='Executar Gradiente Conjugado Precondicionado')
+    method_group.add_argument('--jacobi-order2', action='store_true',
+                              help='Habilita o método de Jacobi de Segunda Ordem')
+    method_group.add_argument('--gauss-seidel-order2', action='store_true',
+                              help='Habilita o método de Gauss-Seidel de Segunda Ordem')
     
     # Opções de execução
     parser.add_argument('--no-plots', action='store_true',
@@ -86,7 +92,7 @@ def parse_arguments():
     
     # Se nenhum método foi especificado (e não é benchmark ou não linear), usar --all
     is_method_selected = any([
-        args.jacobi, args.gauss_seidel, args.conjugate_gradient, args.preconditioned_cg
+        args.jacobi, args.gauss_seidel, args.conjugate_gradient, args.cgs, args.preconditioned_cg, args.jacobi_order2, args.gauss_seidel_order2
     ])
     if not args.nonlinear and not args.benchmark and not args.all and not is_method_selected:
         print("⚠️  Nenhum método selecionado para análise. Usando --all por padrão.")

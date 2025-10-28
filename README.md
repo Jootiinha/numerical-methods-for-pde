@@ -15,7 +15,8 @@ Uma biblioteca Python abrangente para resolução de sistemas lineares usando m�
   - Método de Gauss-Seidel de Ordem 2 (SOR de ordem 2)
 
 - **Métodos do Gradiente:**
-  - Gradiente Conjugado
+  - Gradiente Conjugado (para matrizes simétricas)
+  - Gradiente Conjugado Quadrado (CGS) (para matrizes não simétricas)
   - Gradiente Conjugado Precondicionado
 
 ### Recursos
@@ -122,6 +123,39 @@ python main.py --nonlinear
 python main.py --help
 ```
 
+### Análise de Performance (Modo Benchmark)
+
+A aplicação inclui um modo de benchmark robusto para analisar a performance dos métodos iterativos. Ao executar o comando `--benchmark`, o script realiza uma série de testes para cada sistema encontrado na pasta `data/`, avaliando os métodos em diferentes níveis de tolerância.
+
+**Funcionalidades do Benchmark:**
+
+- **Múltiplas Rodadas:** Executa cada método 10 vezes por padrão para obter estatísticas de tempo confiáveis.
+- **Variação de Tolerância:** Testa os métodos com tolerâncias de `1e-3`, `1e-4`, `1e-5` e `1e-6`.
+- **Relatórios Detalhados:** Gera arquivos de texto na pasta `results/` para cada combinação de sistema e tolerância.
+
+**Como Interpretar o Relatório de Benchmark:**
+
+Cada relatório (`benchmark_timing_*.txt`) contém uma seção crucial:
+
+```
+ESTIMATIVAS DE TEMPO DE MÁQUINA:
+----------------------------------------
+Para obter resultados aceitáveis (convergência com tolerância especificada):
+
+Jacobi:
+  Tempo típico: 0.0005s
+  Tempo conservador (+2σ): 0.0011s
+  Probabilidade de sucesso: 100.0%
+  Iterações típicas: 26
+  Classificação: MUITO RÁPIDO
+```
+
+- **Tempo Típico:** O tempo médio de execução para o método convergir.
+- **Tempo Conservador:** Uma estimativa mais pessimista, que considera o desvio padrão (`média + 2 * desvio padrão`), útil para prever o desempenho no pior caso.
+- **Classificação:** Uma avaliação qualitativa da velocidade do método (de `MUITO RÁPIDO` a `MUITO LENTO`).
+
+Este recurso permite estimar o tempo de máquina necessário para que cada método atinja a precisão desejada, cumprindo o objetivo principal da análise de performance.
+
 ### Uso como Biblioteca
 
 O código também pode ser importado e utilizado como uma biblioteca em outros projetos Python. Os exemplos abaixo demonstram como usar os componentes individuais.
@@ -143,7 +177,7 @@ A, b = CSVMatrixLoader.load_separate_files("matriz_A.csv", "vetor_b.csv")
 ```python
 from linear_solver import (
     JacobiSolver, GaussSeidelSolver, 
-    ConjugateGradientSolver,
+    ConjugateGradientSolver, CGSSolver,
     JacobiOrder2Solver,
     PreconditionedConjugateGradientSolver
 )
@@ -159,6 +193,10 @@ x_gs, info_gs = solver_gs.solve(A, b)
 # Gradiente Conjugado (para matrizes simétricas e positivas definidas)
 solver_cg = ConjugateGradientSolver(tolerance=1e-8)
 x_cg, info_cg = solver_cg.solve(A, b)
+
+# Gradiente Conjugado Quadrado (para matrizes não simétricas)
+solver_cgs = CGSSolver(tolerance=1e-8)
+x_cgs, info_cgs = solver_cgs.solve(A, b)
 
 # Jacobi de Ordem 2 com parâmetros personalizados
 solver_j2 = JacobiOrder2Solver(omega1=0.8, omega2=0.15, omega3=0.05)
