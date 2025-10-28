@@ -61,7 +61,21 @@ python main.py --nonlinear --tolerance 1e-8
 
 # Com número máximo de iterações personalizado
 python main.py --nonlinear --max-iterations 2000
+
+# Gerar mapa de bacias de atração (plano 2D)
+python main.py --nonlinear --basin-map
+
+# Gerar mapa com resolução personalizada
+python main.py --nonlinear --basin-map --basin-resolution 200
 ```
+
+## Análise de Bacias de Atração
+
+Foi implementada uma ferramenta de visualização para gerar o **mapa de bacias de atração**. Este mapa ajuda a entender o comportamento de um método iterativo (atualmente, o método de Newton) em relação a diferentes pontos de partida.
+
+- **O que é?**: É uma imagem onde cada pixel corresponde a um "chute" inicial. A cor do pixel indica para qual das raízes do sistema o método convergiu a partir daquele chute.
+- **Utilidade**: Ajuda a visualizar a sensibilidade do método à aproximação inicial. Regiões de cores complexas ou fractais podem indicar um comportamento caótico.
+- **Implementação**: A análise é feita em um plano 2D (atualmente fixo em `z=0`) onde uma grade de pontos `(x, y)` é varrida. Para cada ponto, o método de Newton é executado para determinar a qual raiz ele converge.
 
 ### Via Código Python
 
@@ -124,8 +138,9 @@ Para o sistema implementado, os métodos encontram duas soluções principais:
 
 Os resultados são salvos em:
 - `results/nonlinear/`: Diretório principal
-- `nonlinear_results_tol_X_TIMESTAMP.txt`: Relatório detalhado
-- Gráficos de convergência (se matplotlib disponível)
+- `nonlinear_results_tol_X_TIMESTAMP.txt`: Relatório detalhado.
+- `nonlinear_comparison_TIMESTAMP.png`: Gráficos de comparação de performance dos métodos.
+- `basin_map_TIMESTAMP.png`: Mapa de bacias de atração (se solicitado via `--basin-map`).
 
 ## Estrutura do Código
 

@@ -289,6 +289,14 @@ Este comando primeiro limpa todos os resultados da pasta `results/` e depois exe
 python main.py --clear-old-data --all
 ```
 
+### Exemplo 5: Gerar mapa de bacias de atração
+
+Este comando gera uma visualização das bacias de atração para o sistema não linear, mostrando para qual raiz o método de Newton converge a partir de diferentes pontos iniciais em um plano 2D.
+
+```bash
+python main.py --nonlinear --basin-map --basin-resolution 150
+```
+
 ## 🔬 Testes
 
 Execute os testes para verificar a instalação:
