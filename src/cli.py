@@ -11,7 +11,6 @@ def parse_arguments():
                 %(prog)s --jacobi                   # Apenas método de Jacobi
                 %(prog)s --jacobi --gauss-seidel    # Jacobi e Gauss-Seidel
                 %(prog)s --conjugate-gradient       # Apenas Gradiente Conjugado
-                %(prog)s --jacobi-order2            # Jacobi de segunda ordem
                 %(prog)s --no-plots                 # Executar sem gráficos
                 %(prog)s --clear-old-data           # Limpar resultados anteriores
                 %(prog)s --all --save-solutions --clear-old-data # Execução completa limpa
@@ -20,26 +19,17 @@ def parse_arguments():
     )
     
     # Métodos disponíveis
-    parser.add_argument('--all', action='store_true',
-                       help='Executar todos os métodos disponíveis')
-    
-    parser.add_argument('--jacobi', action='store_true',
-                       help='Executar método de Jacobi')
-    
-    parser.add_argument('--gauss-seidel', action='store_true',
-                       help='Executar método de Gauss-Seidel')
-    
-    parser.add_argument('--conjugate-gradient', action='store_true',
-                       help='Executar Gradiente Conjugado (apenas para matrizes simétricas positivas definidas)')
-    
-    parser.add_argument('--jacobi-order2', action='store_true',
-                       help='Executar Jacobi de segunda ordem')
-    
-    parser.add_argument('--gauss-seidel-order2', action='store_true',
-                       help='Executar Gauss-Seidel de segunda ordem')
-    
-    parser.add_argument('--preconditioned-cg', action='store_true',
-                       help='Executar Gradiente Conjugado Precondicionado')
+    method_group = parser.add_argument_group('Seleção de Métodos')
+    method_group.add_argument('--all', action='store_true',
+                              help='Executar todos os métodos disponíveis')
+    method_group.add_argument('--jacobi', action='store_true',
+                              help='Executar método de Jacobi')
+    method_group.add_argument('--gauss-seidel', action='store_true',
+                              help='Executar método de Gauss-Seidel')
+    method_group.add_argument('--conjugate-gradient', action='store_true',
+                              help='Executar Gradiente Conjugado (para matrizes simétricas pos-def)')
+    method_group.add_argument('--preconditioned-cg', action='store_true',
+                              help='Executar Gradiente Conjugado Precondicionado')
     
     # Opções de execução
     parser.add_argument('--no-plots', action='store_true',
@@ -76,14 +66,12 @@ def parse_arguments():
     if args.visualize_benchmark and not args.benchmark:
         parser.error("--visualize-benchmark requer --benchmark")
     
-    # Se nenhum método foi especificado E não é sistema não linear, usar --all
-    if not args.nonlinear and not any([args.all, args.jacobi, args.gauss_seidel, args.conjugate_gradient,
-                                      args.jacobi_order2, args.gauss_seidel_order2, args.preconditioned_cg]):
-        print("⚠️  Nenhum método especificado. Usando --all por padrão.")
+    # Se nenhum método foi especificado (e não é benchmark ou não linear), usar --all
+    is_method_selected = any([
+        args.jacobi, args.gauss_seidel, args.conjugate_gradient, args.preconditioned_cg
+    ])
+    if not args.nonlinear and not args.benchmark and not args.all and not is_method_selected:
+        print("⚠️  Nenhum método selecionado para análise. Usando --all por padrão.")
         args.all = True
-    
-    # Validar sistemas não lineares
-    if args.nonlinear:
-        parser.error("Módulo nonlinear_solver não encontrado. Verifique se foi instalado corretamente.")
-    
+        
     return args

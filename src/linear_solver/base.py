@@ -48,6 +48,18 @@ class LinearSolver(ABC):
     def get_method_name(self) -> str:
         """Retorna o nome do método."""
         pass
+
+    def get_iteration_matrix(self, A: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Retorna a matriz de iteração do método, se aplicável.
+        
+        Args:
+            A: Matriz de coeficientes
+            
+        Returns:
+            Matriz de iteração ou None se não for aplicável.
+        """
+        return None
         
     def _check_convergence(self, x_new: np.ndarray, x_old: np.ndarray) -> bool:
         """

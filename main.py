@@ -26,12 +26,8 @@ from src.benchmark.main import run_benchmark_mode
 
 warnings.filterwarnings('ignore')
 
-def main():
-    """Função principal da aplicação."""
-    
-    # Parse argumentos da linha de comando
-    args = parse_arguments()
-    
+def _print_execution_summary(args):
+    """Imprime um resumo dos parâmetros de execução."""
     title = "BENCHMARK DE TEMPO DOS MÉTODOS" if args.benchmark else "ANÁLISE DE SISTEMAS REAIS"
     print(f"🔬 LINEAR SOLVER - {title}")
     print("=" * 60)
@@ -45,130 +41,77 @@ def main():
     else:
         print(f"⚙️  Visualizações benchmark: {'Habilitadas' if args.visualize_benchmark else 'Desabilitadas'}")
     print(f"⚙️  Limpar dados anteriores: {'Sim' if args.clear_old_data else 'Não'}")
-    
-    # Limpar dados anteriores se solicitado
+    print("=" * 60)
+
+def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
+    """Carrega e processa um único sistema linear."""
+    A, b = carregar_sistema(nome, tipo, arquivo1, arquivo2)
+    if A is None or b is None:
+        return False
+
+    print(f"✅ Sistema carregado: {A.shape[0]}x{A.shape[1]} + vetor b({b.shape[0]})")
+
+    try:
+        if args.benchmark:
+            run_benchmark_mode(A, b, nome, args)
+        else:
+            analyze_matrix_properties(A, nome)
+            if not args.skip_conditioning:
+                analisar_condicionamento_sistema(A, nome)
+            else:
+                print("⚠️  Análise de condicionamento pulada (--skip-conditioning)")
+
+            results, solutions = solve_with_selected_methods(A, b, nome, args)
+            compare_solutions(solutions, A, b)
+            save_solutions(solutions, A, b, nome, args)
+
+            if not args.no_plots:
+                converged_results = {name: info for name, info in results.items() if info and info.get('converged')}
+                if converged_results:
+                    plot_convergence_comparison(converged_results, nome)
+                else:
+                    print("❌ Nenhum método convergiu para plotar")
+        return True
+    except Exception as e:
+        print(f"💥 Erro ao processar {nome}: {str(e)}")
+        return False
+
+def main():
+    """Função principal da aplicação."""
+    args = parse_arguments()
+    _print_execution_summary(args)
+
     if args.clear_old_data:
         clear_old_results()
-    
-    # Se sistema não linear foi solicitado, resolver e sair
+
     if args.nonlinear:
-        success = solve_nonlinear_system(
-            tolerance=args.tolerance,
-            max_iterations=args.max_iterations
-        )
-        if success:
-            print("\n🎉 Processamento concluído com sucesso!")
+        if solve_nonlinear_system(tolerance=args.tolerance, max_iterations=args.max_iterations):
+            print("\n🎉 Processamento não linear concluído com sucesso!")
         else:
-            print("\n❌ Falha no processamento.")
+            print("\n❌ Falha no processamento não linear.")
         return
-    
-    # Mostrar métodos selecionados (apenas no modo normal)
-    if not args.benchmark:
-        selected_methods = []
-        if args.all:
-            selected_methods.append("TODOS")
-        else:
-            if args.jacobi: selected_methods.append("Jacobi")
-            if args.gauss_seidel: selected_methods.append("Gauss-Seidel")
-            if args.conjugate_gradient: selected_methods.append("Gradiente Conjugado")
-            if args.jacobi_order2: selected_methods.append("Jacobi Ordem 2")
-            if args.gauss_seidel_order2: selected_methods.append("Gauss-Seidel Ordem 2")
-            if args.preconditioned_cg: selected_methods.append("Gradiente Conjugado Precondicionado")
-        
-        print(f"📋 Métodos: {', '.join(selected_methods)}")
-    else:
-        print("📋 Modo benchmark: Todos os métodos aplicáveis serão testados")
-    
-    # Descobrir sistemas disponíveis na pasta data/
+
     sistemas = descobrir_sistemas_disponiveis()
-    
     if not sistemas:
         print("❌ Nenhum sistema encontrado na pasta data/")
         print("💡 Certifique-se de que há arquivos de dados na pasta ./data/")
         return
-    
-    # Lista para rastrear sistemas processados com sucesso
+
     sistemas_processados = []
-    
-    # Processar cada sistema encontrado
     for i, (nome, tipo, arquivo1, arquivo2) in enumerate(sistemas, 1):
-        print(f"\n{'='*60}")
-        print(f"PROCESSANDO {i}/{len(sistemas)}: {nome}")
-        print(f"{'='*60}")
-        
-        # Carregar sistema
-        A, b = carregar_sistema(nome, tipo, arquivo1, arquivo2)
-        if A is None or b is None:
-            continue
-        
-        print(f"✅ Sistema carregado: {A.shape[0]}x{A.shape[1]} + vetor b({b.shape[0]})")
-        
-        try:
-            # Verificar se está no modo benchmark
-            if args.benchmark:
-                # Executar modo benchmark
-                run_benchmark_mode(A, b, nome, args)
-                sistemas_processados.append(nome)
-            else:
-                # Execução normal
-                # Analisar propriedades da matriz
-                analyze_matrix_properties(A, nome)
-                
-                # *** ANÁLISE DE CONDICIONAMENTO INTEGRADA ***
-                if not args.skip_conditioning:
-                    analisar_condicionamento_sistema(A, nome)
-                else:
-                    print("⚠️  Análise de condicionamento pulada (--skip-conditioning)")
-                
-                # Resolver com métodos selecionados
-                results, solutions = solve_with_selected_methods(A, b, nome, args)
-                
-                # Comparar soluções obtidas
-                compare_solutions(solutions, A, b)
-                
-                # Salvar soluções se solicitado
-                save_solutions(solutions, A, b, nome, args)
-                
-                # Plotar convergência (apenas para métodos que convergiram)
-                if not args.no_plots:
-                    converged_results = {name: info for name, info in results.items() 
-                                       if info and info['converged']}
-                    
-                    if converged_results:
-                        plot_convergence_comparison(converged_results, nome)
-                    else:
-                        print("❌ Nenhum método convergiu para plotar")
-                
-                # Adicionar sistema à lista de processados com sucesso
-                sistemas_processados.append(nome)
-            
-        except Exception as e:
-            print(f"💥 Erro ao processar {nome}: {str(e)}")
-        
-        # Separador entre sistemas
+        print(f"\n{'='*60}\nPROCESSANDO {i}/{len(sistemas)}: {nome}\n{'='*60}")
+        if _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
+            sistemas_processados.append(nome)
         if i < len(sistemas):
             print("\n" + "~" * 60)
-    
+
     print("\n🎉 ANÁLISE CONCLUÍDA!")
-    
-    # Criar relatório de execução
     if sistemas_processados:
         create_summary_report(sistemas_processados, args)
-    
-    # Mostrar estrutura de resultados criada
+
     results_dir = Path("results")
     if results_dir.exists():
         print(f"📁 Resultados organizados em: {results_dir.absolute()}")
-        
-        charts_dir = results_dir / "charts"
-        if charts_dir.exists() and any(charts_dir.iterdir()):
-            chart_count = len(list(charts_dir.glob("*.png")))
-            print(f"   📊 Gráficos ({chart_count}): {charts_dir}")
-        
-        text_results_dir = results_dir / "text_results"
-        if text_results_dir.exists() and any(text_results_dir.iterdir()):
-            solution_count = len(list(text_results_dir.glob("*.txt")))
-            print(f"   💾 Soluções ({solution_count}): {text_results_dir}")
     
     print(f"✅ {len(sistemas_processados)}/{len(sistemas)} sistemas processados com sucesso")
 

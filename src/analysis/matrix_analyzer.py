@@ -2,51 +2,7 @@ import numpy as np
 from pathlib import Path
 from typing import Dict
 from src.linear_solver.utils.matrix_validator import MatrixValidator
-
-def calcular_matriz_iteracao_jacobi(A: np.ndarray) -> np.ndarray:
-    """Calcula a matriz de iteração do método de Jacobi."""
-    n = A.shape[0]
-    D = np.diag(np.diag(A))
-    D_inv = np.linalg.inv(D)
-    M = np.eye(n) - D_inv @ A
-    return M
-
-
-def calcular_matriz_iteracao_gauss_seidel(A: np.ndarray) -> np.ndarray:
-    """Calcula a matriz de iteração do método de Gauss-Seidel."""
-    n = A.shape[0]
-    D = np.diag(np.diag(A))
-    L = np.tril(A, -1)
-    U = np.triu(A, 1)
-    DL = D + L
-    M = np.linalg.solve(DL, U)
-    return M
-
-
-def calcular_matriz_iteracao_jacobi_ordem2(A: np.ndarray, omega1: float = 0.7, 
-                                          omega2: float = 0.2, omega3: float = 0.1) -> np.ndarray:
-    """Calcula matriz de iteração aproximada para Jacobi de ordem 2."""
-    M_jacobi = calcular_matriz_iteracao_jacobi(A)
-    n = A.shape[0]
-    I = np.eye(n)
-    M_j2 = omega1 * M_jacobi + omega2 * I + omega3 * np.linalg.matrix_power(M_jacobi, 2)
-    return M_j2
-
-
-def calcular_matriz_iteracao_gauss_seidel_ordem2(A: np.ndarray, omega_relax: float = 1.2,
-                                                omega1: float = 0.8, omega2: float = 0.15, 
-                                                omega3: float = 0.05) -> np.ndarray:
-    """Calcula matriz de iteração aproximada para Gauss-Seidel de ordem 2 com SOR."""
-    n = A.shape[0]
-    D = np.diag(np.diag(A))
-    L = np.tril(A, -1)
-    U = np.triu(A, 1)
-    D_wL = D + omega_relax * L
-    rhs = (1 - omega_relax) * D - omega_relax * U
-    M_sor = np.linalg.solve(D_wL, rhs)
-    I = np.eye(n)
-    M_gs2 = omega1 * M_sor + omega2 * I + omega3 * np.linalg.matrix_power(M_sor, 2)
-    return M_gs2
+from src.linear_solver.methods import JacobiSolver, GaussSeidelSolver
 
 
 def calcular_normas_matriz(M: np.ndarray) -> Dict[str, float]:
@@ -132,14 +88,24 @@ def analisar_condicionamento_sistema(A: np.ndarray, matrix_name: str):
     print(f"\n📊 ANÁLISE DE CONDICIONAMENTO: {matrix_name}")
     print("-" * 60)
     
-    # Calcular matrizes de iteração
+    # Instanciar solvers com configurações padrão para análise
+    solvers = [
+        JacobiSolver(),
+        GaussSeidelSolver(),
+        GaussSeidelSolver(relaxation_factor=1.25), # SOR
+        JacobiSolver(omega1=0.8, omega2=0.2), # Jacobi Ordem 2
+    ]
+
+    # Calcular matrizes de iteração a partir dos solvers
     print("🔧 Calculando matrizes de iteração...")
-    matrizes_iteracao = {
-        'M1 (Jacobi)': calcular_matriz_iteracao_jacobi(A),
-        'M2 (Gauss-Seidel)': calcular_matriz_iteracao_gauss_seidel(A),
-        'M3 (Jacobi Ordem 2)': calcular_matriz_iteracao_jacobi_ordem2(A),
-        'M4 (Gauss-Seidel Ordem 2)': calcular_matriz_iteracao_gauss_seidel_ordem2(A)
-    }
+    matrizes_iteracao = {}
+    for solver in solvers:
+        try:
+            matrix = solver.get_iteration_matrix(A)
+            if matrix is not None:
+                matrizes_iteracao[solver.get_method_name()] = matrix
+        except Exception as e:
+            print(f"⚠️  Não foi possível calcular a matriz de iteração para {solver.get_method_name()}: {e}")
     
     # Condicionamento da matriz A
     print("📊 Calculando condicionamento da matriz A...")
@@ -158,9 +124,9 @@ def analisar_condicionamento_sistema(A: np.ndarray, matrix_name: str):
     
     print("\n🔄 Raio Espectral das Matrizes de Iteração:")
     for nome, normas in normas_resultados.items():
-        rho = normas['Raio_Espectral']
+        rho = normas.get('Raio_Espectral', float('nan'))
         status = "✅" if rho < 1 else "❌"
-        print(f"   {nome:25}: ρ = {rho:.6f} {status}")
+        print(f"   {nome:40}: ρ = {rho:.6f} {status}")
     
     # Salvar resultados detalhados
     results_dir = Path("results")

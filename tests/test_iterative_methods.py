@@ -4,7 +4,7 @@ Testes para os métodos iterativos (Jacobi e Gauss-Seidel).
 
 import pytest
 import numpy as np
-from linear_solver.methods import JacobiSolver, GaussSeidelSolver
+from src.linear_solver.methods import JacobiSolver, GaussSeidelSolver
 
 
 class TestJacobiSolver:
@@ -91,6 +91,23 @@ class TestJacobiSolver:
         # Verificar se erro diminui (pelo menos no final)
         assert history[-1] < history[0], "Erro deveria diminuir"
 
+    def test_order2_functionality(self):
+        """Teste da funcionalidade de ordem 2 do Jacobi."""
+        # Usando pesos que devem convergir
+        solver_ord2 = JacobiSolver(
+            tolerance=1e-8, max_iterations=1000,
+            omega1=0.8, omega2=0.2, omega3=0.0
+        )
+        A = np.array([[4, -1], [-1, 4]], dtype=float)
+        b = np.array([3, 3], dtype=float)
+        
+        x, info = solver_ord2.solve(A, b)
+        
+        assert info['converged']
+        assert "Ordem 2" in info['method']
+        assert 'parameters' in info
+        assert 'omega1' in info['parameters']
+
 
 class TestGaussSeidelSolver:
     """Testes para o método de Gauss-Seidel."""
@@ -132,6 +149,39 @@ class TestGaussSeidelSolver:
     def test_method_name(self):
         """Teste do nome do método."""
         assert self.solver.get_method_name() == "Gauss-Seidel"
+
+    def test_sor_functionality(self):
+        """Teste da funcionalidade SOR."""
+        sor_solver = GaussSeidelSolver(
+            tolerance=1e-8, max_iterations=1000, relaxation_factor=1.2
+        )
+        A = np.array([[4, -1], [-1, 4]], dtype=float)
+        b = np.array([3, 3], dtype=float)
+        
+        x, info = sor_solver.solve(A, b)
+        
+        assert info['converged']
+        assert "SOR" in info['method']
+        assert 'parameters' in info
+        assert 'relaxation_factor' in info['parameters']
+        assert info['parameters']['relaxation_factor'] == 1.2
+
+    def test_order2_functionality(self):
+        """Teste da funcionalidade de ordem 2 do Gauss-Seidel."""
+        solver_ord2 = GaussSeidelSolver(
+            tolerance=1e-8, max_iterations=1000,
+            relaxation_factor=1.1, omega1=0.9, omega2=0.1
+        )
+        A = np.array([[4, -1], [-1, 4]], dtype=float)
+        b = np.array([3, 3], dtype=float)
+        
+        x, info = solver_ord2.solve(A, b)
+        
+        assert info['converged']
+        assert "Ordem 2" in info['method']
+        assert 'parameters' in info
+        assert 'omega1' in info['parameters']
+        assert 'relaxation_factor' in info['parameters']
 
 
 class TestIterativeMethodsCommon:

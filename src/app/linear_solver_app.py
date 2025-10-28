@@ -1,64 +1,55 @@
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt
 from src.linear_solver.methods import (
     JacobiSolver, GaussSeidelSolver, ConjugateGradientSolver,
-    JacobiOrder2Solver, GaussSeidelOrder2Solver,
     PreconditionedConjugateGradientSolver
 )
 from src.linear_solver.utils.matrix_validator import MatrixValidator
-import matplotlib.pyplot as plt
 
 def build_methods_list(args, analysis):
-    """Constrói a lista de métodos baseada nos argumentos fornecidos."""
+    """Constrói a lista de métodos com base nos argumentos e análise da matriz."""
     
-    methods = []
+    method_configs = {
+        'jacobi': (JacobiSolver, {}),
+        'gauss_seidel': (GaussSeidelSolver, {}),
+        'sor': (GaussSeidelSolver, {'relaxation_factor': 1.25}), # Exemplo de SOR
+        'conjugate_gradient': (ConjugateGradientSolver, {}),
+        'preconditioned_cg': (PreconditionedConjugateGradientSolver, {})
+    }
     
-    # Métodos básicos
-    if args.all or args.jacobi:
-        methods.append(("Jacobi", JacobiSolver(
-            tolerance=args.tolerance, 
-            max_iterations=args.max_iterations
-        )))
-    
-    if args.all or args.gauss_seidel:
-        methods.append(("Gauss-Seidel", GaussSeidelSolver(
-            tolerance=args.tolerance, 
-            max_iterations=args.max_iterations
-        )))
-    
-    # Métodos de segunda ordem
-    if args.all or args.jacobi_order2:
-        methods.append(("Jacobi Ordem 2", JacobiOrder2Solver(
-            tolerance=args.tolerance, 
-            max_iterations=args.max_iterations,
-            omega1=0.7, omega2=0.2, omega3=0.1
-        )))
-    
-    if args.all or args.gauss_seidel_order2:
-        methods.append(("Gauss-Seidel Ordem 2", GaussSeidelOrder2Solver(
-            tolerance=args.tolerance, 
-            max_iterations=args.max_iterations,
-            relaxation_factor=1.2, omega1=0.8, omega2=0.15, omega3=0.05
-        )))
-    
-    # Métodos para matrizes simétricas positivas definidas
-    if analysis['is_symmetric'] and analysis['is_positive_definite']:
-        if args.all or args.conjugate_gradient:
-            methods.append(("Gradiente Conjugado", ConjugateGradientSolver(
-                tolerance=args.tolerance
-            )))
-        
-        if args.all or args.preconditioned_cg:
-            methods.append(("Gradiente Conjugado Precondicionado", 
-                           PreconditionedConjugateGradientSolver(
-                               tolerance=args.tolerance
-                           )))
+    methods_to_run = []
+    if args.all:
+        methods_to_run.extend(method_configs.keys())
     else:
-        # Avisar se métodos específicos para SPD foram solicitados mas a matriz não é SPD
-        if args.conjugate_gradient or args.preconditioned_cg:
-            print("⚠️  Métodos de Gradiente Conjugado ignorados: matriz não é simétrica positiva definida")
+        for name in method_configs:
+            if getattr(args, name, False):
+                methods_to_run.append(name)
     
-    return methods
+    # Adicionar SOR se Gauss-Seidel for selecionado
+    if 'gauss_seidel' in methods_to_run and 'sor' not in methods_to_run:
+        methods_to_run.append('sor')
+
+    # Filtrar métodos de GC para matrizes não-SPD
+    is_spd = analysis.get('is_symmetric', False) and analysis.get('is_positive_definite', False)
+    if not is_spd:
+        spd_methods = {'conjugate_gradient', 'preconditioned_cg'}
+        if any(m in methods_to_run for m in spd_methods):
+             print("⚠️  Métodos de Gradiente Conjugado ignorados: matriz não é simétrica positiva definida")
+        methods_to_run = [m for m in methods_to_run if m not in spd_methods]
+
+    # Construir instâncias dos solvers
+    solvers = []
+    for name in methods_to_run:
+        SolverClass, params = method_configs[name]
+        instance = SolverClass(
+            tolerance=args.tolerance,
+            max_iterations=args.max_iterations,
+            **params
+        )
+        solvers.append((instance.get_method_name(), instance))
+        
+    return solvers
 
 
 def solve_with_selected_methods(A, b, matrix_name, args):
@@ -151,113 +142,56 @@ def compare_solutions(solutions, A, b):
                     print(f"  {method_name} vs {ref_method}: erro = {error:.2e}")
 
 
+def _plot_subplot(ax, data, plot_type, title, xlabel, ylabel, use_log=False):
+    """Função auxiliar para criar um subplot."""
+    colors = plt.cm.viridis(np.linspace(0, 1, len(data)))
+    
+    if plot_type == 'line':
+        for i, (name, values) in enumerate(data.items()):
+            if values:
+                ax.semilogy(range(1, len(values) + 1), values, label=name, color=colors[i], marker='o', markersize=4, linewidth=2)
+        ax.legend()
+    elif plot_type == 'bar':
+        names = list(data.keys())
+        values = list(data.values())
+        bars = ax.bar(names, values, color=colors, alpha=0.8)
+        for bar in bars:
+            yval = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2.0, yval, f'{yval:.2e}' if use_log else int(yval), va='bottom', ha='center')
+        ax.set_xticklabels(names, rotation=45, ha="right")
+
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if use_log:
+        ax.set_yscale('log')
+    ax.grid(True, which="both", ls="--", alpha=0.3)
+
 def plot_convergence_comparison(results, matrix_name):
-    """Plota comparação de convergência dos métodos."""
+    """Plota comparação de convergência dos métodos de forma modular."""
+    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+    fig.suptitle(f"Análise de Convergência para '{matrix_name}'", fontsize=16)
     
-    plt.figure(figsize=(14, 10))
+    converged_results = {name: info for name, info in results.items() if info and info.get('converged')}
     
-    # Subplot 1: Histórico de convergência  
-    plt.subplot(2, 2, 1)
+    # Dados para os plots
+    error_history = {name: info['convergence_history'] for name, info in converged_results.items()}
+    residual_history = {name: info['residual_history'] for name, info in converged_results.items() if 'residual_history' in info}
+    iterations = {name: info['iterations'] for name, info in converged_results.items()}
+    final_errors = {name: info['final_error'] for name, info in converged_results.items()}
+
+    # Criar subplots
+    _plot_subplot(axes[0, 0], error_history, 'line', 'Histórico de Erro', 'Iteração', 'Erro')
+    _plot_subplot(axes[0, 1], residual_history, 'line', 'Histórico de Resíduo', 'Iteração', 'Resíduo')
+    _plot_subplot(axes[1, 0], iterations, 'bar', 'Iterações até Convergência', 'Método', 'Número de Iterações')
+    _plot_subplot(axes[1, 1], final_errors, 'bar', 'Erro Final', 'Método', 'Erro Final', use_log=True)
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     
-    colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown']
-    markers = ['o', 's', '^', 'D', 'v', 'p']
-    
-    for i, (method_name, info) in enumerate(results.items()):
-        if info and info['converged'] and 'convergence_history' in info:
-            history = info['convergence_history']
-            if history:
-                plt.semilogy(
-                    range(1, len(history) + 1), history, 
-                    label=method_name, 
-                    color=colors[i % len(colors)],
-                    marker=markers[i % len(markers)],
-                    markersize=4, linewidth=2
-                )
-    
-    plt.xlabel('Iteração')
-    plt.ylabel('Erro (escala log)')
-    plt.title(f'Convergência - {matrix_name}')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    # Subplot 2: Número de iterações
-    plt.subplot(2, 2, 2)
-    
-    method_names = []
-    iterations = []
-    colors_bar = []
-    
-    for i, (method_name, info) in enumerate(results.items()):
-        if info and info['converged']:
-            method_names.append(method_name)
-            iterations.append(info['iterations'])
-            colors_bar.append(colors[i % len(colors)])
-    
-    if method_names:
-        bars = plt.bar(method_names, iterations, color=colors_bar, alpha=0.7)
-        plt.ylabel('Número de Iterações')
-        plt.title('Iterações para Convergência')
-        plt.xticks(rotation=45, ha='right')
-        
-        # Adicionar valores nas barras
-        for bar, iter_count in zip(bars, iterations):
-            plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
-                    str(iter_count), ha='center', va='bottom')
-    
-    # Subplot 3: Erro final
-    plt.subplot(2, 2, 3)
-    
-    method_names_error = []
-    final_errors = []
-    colors_error = []
-    
-    for i, (method_name, info) in enumerate(results.items()):
-        if info and info['converged']:
-            method_names_error.append(method_name)
-            final_errors.append(info['final_error'])
-            colors_error.append(colors[i % len(colors)])
-    
-    if method_names_error:
-        bars = plt.bar(method_names_error, final_errors, color=colors_error, alpha=0.7)
-        plt.ylabel('Erro Final')
-        plt.yscale('log')
-        plt.title('Erro Final por Método')
-        plt.xticks(rotation=45, ha='right')
-    
-    # Subplot 4: Comparação de resíduos (se disponível)
-    plt.subplot(2, 2, 4)
-    
-    if any('residual_history' in info for info in results.values() if info):
-        for i, (method_name, info) in enumerate(results.items()):
-            if info and 'residual_history' in info and info['residual_history']:
-                plt.semilogy(
-                    range(1, len(info['residual_history']) + 1), 
-                    info['residual_history'],
-                    label=method_name,
-                    color=colors[i % len(colors)],
-                    marker=markers[i % len(markers)],
-                    markersize=4, linewidth=2
-                )
-        plt.xlabel('Iteração')
-        plt.ylabel('Resíduo (escala log)')
-        plt.title('História do Resíduo')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-    else:
-        plt.text(0.5, 0.5, 'Dados de resíduo\nnão disponíveis', 
-                ha='center', va='center', transform=plt.gca().transAxes)
-    
-    plt.tight_layout()
-    
-    # Criar estrutura de diretórios para gráficos
-    results_dir = Path("results")
-    charts_dir = results_dir / "charts"
+    # Salvar figura
+    charts_dir = Path("results") / "charts"
     charts_dir.mkdir(parents=True, exist_ok=True)
-    
-    # Salvar gráfico na pasta apropriada
-    chart_filename = f'convergencia_{matrix_name.replace(" ", "_").lower()}.png'
-    chart_path = charts_dir / chart_filename
-    
+    chart_path = charts_dir / f'convergencia_{matrix_name.replace(" ", "_").lower()}.png'
     plt.savefig(chart_path, dpi=300, bbox_inches='tight')
     print(f"📊 Gráfico salvo: {chart_path}")
     plt.show()

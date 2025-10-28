@@ -5,7 +5,6 @@ import time
 import statistics
 from src.linear_solver.methods import (
     JacobiSolver, GaussSeidelSolver, ConjugateGradientSolver,
-    JacobiOrder2Solver, GaussSeidelOrder2Solver,
     PreconditionedConjugateGradientSolver
 )
 from src.linear_solver.utils.matrix_validator import MatrixValidator
@@ -81,47 +80,33 @@ class MethodBenchmark:
         self.results = {}
         
     def setup_methods(self, A: np.ndarray) -> Dict:
-        """Configura os métodos baseado nas propriedades da matriz."""
-        methods = {}
-        
-        # Analisar matriz para determinar métodos aplicáveis
+        """Configura os métodos com base nas propriedades da matriz."""
         analysis = MatrixValidator.analyze_matrix(A)
+        is_spd = analysis.get('is_symmetric', False) and analysis.get('is_positive_definite', False)
+
+        method_configs = {
+            'Jacobi': (JacobiSolver, {}),
+            'Gauss-Seidel': (GaussSeidelSolver, {}),
+            'SOR (ω=1.25)': (GaussSeidelSolver, {'relaxation_factor': 1.25}),
+            'Jacobi Ordem 2': (JacobiSolver, {'omega1': 0.8, 'omega2': 0.2}),
+        }
         
-        # Métodos básicos (sempre disponíveis)
-        methods['Jacobi'] = JacobiSolver(
-            tolerance=self.tolerance, 
-            max_iterations=self.max_iterations
-        )
-        
-        methods['Gauss-Seidel'] = GaussSeidelSolver(
-            tolerance=self.tolerance, 
-            max_iterations=self.max_iterations
-        )
-        
-        methods['Jacobi Ordem 2'] = JacobiOrder2Solver(
-            tolerance=self.tolerance, 
-            max_iterations=self.max_iterations,
-            omega1=0.7, omega2=0.2, omega3=0.1
-        )
-        
-        methods['Gauss-Seidel Ordem 2'] = GaussSeidelOrder2Solver(
-            tolerance=self.tolerance, 
-            max_iterations=self.max_iterations,
-            relaxation_factor=1.2, omega1=0.8, omega2=0.15, omega3=0.05
-        )
-        
-        # Métodos para matrizes simétricas positivas definidas
-        if analysis['is_symmetric'] and analysis['is_positive_definite']:
-            methods['Gradiente Conjugado'] = ConjugateGradientSolver(
-                tolerance=self.tolerance
+        if is_spd:
+            method_configs['Gradiente Conjugado'] = (ConjugateGradientSolver, {})
+            method_configs['Gradiente Conjugado Precondicionado'] = (PreconditionedConjugateGradientSolver, {})
+
+        solvers = {}
+        for name, (SolverClass, params) in method_configs.items():
+            instance = SolverClass(
+                tolerance=self.tolerance,
+                max_iterations=self.max_iterations,
+                **params
             )
+            # Usar o nome da config como chave para consistência
+            solvers[name] = instance
             
-            methods['Gradiente Conjugado Precondicionado'] = PreconditionedConjugateGradientSolver(
-                tolerance=self.tolerance
-            )
-        
-        print(f"📋 Métodos configurados: {', '.join(methods.keys())}")
-        return methods
+        print(f"📋 Métodos configurados: {', '.join(solvers.keys())}")
+        return solvers
         
     def run_single_benchmark(self, method_name: str, solver, A: np.ndarray, 
                            b: np.ndarray, x_reference: np.ndarray) -> Tuple[float, int, float, bool, float]:

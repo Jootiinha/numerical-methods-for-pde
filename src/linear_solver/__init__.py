@@ -2,11 +2,10 @@
 Biblioteca para resolução de sistemas lineares usando métodos numéricos iterativos.
 
 Métodos implementados:
-- Jacobi
-- Gauss-Seidel  
-- Jacobi de ordem 2
-- Gauss-Seidel de ordem 2
+- Jacobi (com suporte a Ordem 2)
+- Gauss-Seidel (com suporte a SOR e Ordem 2)
 - Gradiente Conjugado
+- Gradiente Conjugado Pré-condicionado
 """
 
 __version__ = "1.0.0"
@@ -15,17 +14,14 @@ __author__ = "João Monteiro - joaocrm@id.uff.br"
 from .base import LinearSolver
 from .methods import (
     JacobiSolver, GaussSeidelSolver,
-    JacobiOrder2Solver, GaussSeidelOrder2Solver,
     ConjugateGradientSolver, PreconditionedConjugateGradientSolver
 )
 from .utils import CSVMatrixLoader, MatrixValidator, MatrixGenerator
 
 __all__ = [
     'LinearSolver',
-    'JacobiSolver', 
+    'JacobiSolver',
     'GaussSeidelSolver',
-    'JacobiOrder2Solver',
-    'GaussSeidelOrder2Solver', 
     'ConjugateGradientSolver',
     'PreconditionedConjugateGradientSolver',
     'CSVMatrixLoader',
