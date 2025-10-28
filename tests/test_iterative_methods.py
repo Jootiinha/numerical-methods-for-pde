@@ -96,7 +96,11 @@ class TestJacobiSolver:
         """Teste da funcionalidade de ordem 2 do Jacobi."""
         # Usando pesos que devem convergir
         solver_ord2 = JacobiSolver(
-            tolerance=1e-8, max_iterations=1000, omega1=0.8, omega2=0.2, omega3=0.0
+            tolerance=1e-8,
+            max_iterations=1000,
+            omega1=0.8,
+            omega2=0.2,
+            omega3=0.0,
         )
         A = np.array([[4, -1], [-1, 4]], dtype=float)
         b = np.array([3, 3], dtype=float)

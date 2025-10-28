@@ -13,8 +13,9 @@ class PreconditionedConjugateGradientSolver(ConjugateGradientSolver):
     """
     Método do Gradiente Conjugado Precondicionado (PCG).
 
-    Utiliza um precondicionador M para acelerar a convergência do CG tradicional.
-    O precondicionador deve ser uma aproximação de A que seja fácil de inverter.
+        Utiliza um precondicionador M para acelerar a convergência do CG
+    tradicional. O precondicionador deve ser uma aproximação de A que
+    seja fácil de inverter.
     """
 
     def __init__(
@@ -31,18 +32,25 @@ class PreconditionedConjugateGradientSolver(ConjugateGradientSolver):
         Args:
             tolerance: Tolerância para convergência
             max_iterations: Número máximo de iterações
-            preconditioner: Tipo de precondicionador ("jacobi", "ssor", ou None)
+            preconditioner: Tipo de precondicionador ("jacobi", "ssor", ou
+            None)
             check_symmetric: Se deve verificar se a matriz é simétrica
-            check_positive_definite: Se deve verificar se a matriz é positiva definida
+            check_positive_definite: Se deve verificar se a matriz é
+            positiva definida
         """
         super().__init__(
-            tolerance, max_iterations, check_symmetric, check_positive_definite
+            tolerance,
+            max_iterations,
+            check_symmetric,
+            check_positive_definite,
         )
         self.preconditioner_type = preconditioner
 
     def get_method_name(self) -> str:
         if self.preconditioner_type:
-            return f"Gradiente Conjugado Precondicionado ({self.preconditioner_type})"
+            return (
+                "Gradiente Conjugado Precondicionado " f"({self.preconditioner_type})"
+            )
         return "Gradiente Conjugado Precondicionado"
 
     def _apply_preconditioner(self, A: np.ndarray, r: np.ndarray) -> np.ndarray:
@@ -59,17 +67,17 @@ class PreconditionedConjugateGradientSolver(ConjugateGradientSolver):
         if self.preconditioner_type == "jacobi":
             # Precondicionador de Jacobi: M = diag(A)
             diagonal = np.diag(A)
-            return r / diagonal
+            return np.asarray(r / diagonal)
 
         elif self.preconditioner_type == "ssor":
             # Precondicionador SSOR simplificado
             # Para demonstração, usar apenas a diagonal (como Jacobi)
             diagonal = np.diag(A)
-            return r / diagonal
+            return np.asarray(r / diagonal)
 
         else:
             # Sem precondicionador
-            return r.copy()
+            return np.asarray(r.copy())
 
     def solve(
         self, A: np.ndarray, b: np.ndarray, x0: Optional[np.ndarray] = None
@@ -80,7 +88,6 @@ class PreconditionedConjugateGradientSolver(ConjugateGradientSolver):
         self._validate_inputs(A, b)
         self._check_matrix_properties(A)
 
-        n = A.shape[0]
         x = self._get_initial_guess(A, x0)
 
         # Inicialização do algoritmo PCG
@@ -111,9 +118,9 @@ class PreconditionedConjugateGradientSolver(ConjugateGradientSolver):
 
             # Verificar convergência
             residual_norm = np.linalg.norm(r)
-            error = np.linalg.norm(x - x_old, ord=np.inf)
+            error = float(np.linalg.norm(x - x_old, ord=np.inf))
             self.convergence_history.append(error)
-            residual_history.append(residual_norm)
+            residual_history.append(float(residual_norm))
 
             if residual_norm < self.tolerance:
                 info = {

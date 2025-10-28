@@ -13,7 +13,8 @@ class ConjugateGradientSolver(LinearSolver):
     """
     Método do Gradiente Conjugado para resolução de sistemas lineares.
 
-    O método é especialmente eficiente para matrizes simétricas e positivas definidas.
+    O método é especialmente eficiente para matrizes simétricas e
+    positivas definidas.
     Converge teoricamente em no máximo n passos para um sistema de dimensão n.
 
     Algoritmo:
@@ -40,7 +41,8 @@ class ConjugateGradientSolver(LinearSolver):
             tolerance: Tolerância para convergência
             max_iterations: Número máximo de iterações
             check_symmetric: Se deve verificar se a matriz é simétrica
-            check_positive_definite: Se deve verificar se a matriz é positiva definida
+            check_positive_definite: Se deve verificar se a matriz é positiva
+            definida
         """
         super().__init__(tolerance, max_iterations)
         self.check_symmetric = check_symmetric
@@ -71,7 +73,7 @@ class ConjugateGradientSolver(LinearSolver):
             eigenvalues = np.linalg.eigvals(A)
             if not np.all(eigenvalues > 1e-12):
                 raise ValueError(
-                    "Matriz A deve ser positiva definida para o Gradiente Conjugado"
+                    "Matriz A deve ser positiva definida para o " "Gradiente Conjugado"
                 )
 
     def solve(
@@ -91,7 +93,6 @@ class ConjugateGradientSolver(LinearSolver):
         self._validate_inputs(A, b)
         self._check_matrix_properties(A)
 
-        n = A.shape[0]
         x = self._get_initial_guess(A, x0)
 
         # Inicialização do algoritmo CG
@@ -123,9 +124,9 @@ class ConjugateGradientSolver(LinearSolver):
             residual_norm = np.sqrt(rsnew)
 
             # Verificar convergência baseada no resíduo
-            error = np.linalg.norm(x - x_old, ord=np.inf)
+            error = float(np.linalg.norm(x - x_old, ord=np.inf))
             self.convergence_history.append(error)
-            residual_history.append(residual_norm)
+            residual_history.append(float(residual_norm))
 
             if residual_norm < self.tolerance:
                 info = {

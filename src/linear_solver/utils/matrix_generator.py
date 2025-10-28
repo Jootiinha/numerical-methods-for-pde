@@ -15,7 +15,9 @@ class MatrixGenerator:
 
     @staticmethod
     def diagonally_dominant_matrix(
-        n: int, dominance_factor: float = 2.0, random_seed: Optional[int] = None
+        n: int,
+        dominance_factor: float = 2.0,
+        random_seed: Optional[int] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Gera uma matriz diagonalmente dominante e um vetor b.
@@ -50,7 +52,9 @@ class MatrixGenerator:
 
     @staticmethod
     def symmetric_positive_definite_matrix(
-        n: int, condition_number: float = 10.0, random_seed: Optional[int] = None
+        n: int,
+        condition_number: float = 10.0,
+        random_seed: Optional[int] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Gera uma matriz simétrica positiva definida.
@@ -113,7 +117,9 @@ class MatrixGenerator:
 
     @staticmethod
     def ill_conditioned_matrix(
-        n: int, condition_number: float = 1e12, random_seed: Optional[int] = None
+        n: int,
+        condition_number: float = 1e12,
+        random_seed: Optional[int] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Gera uma matriz mal condicionada para testar estabilidade numérica.
@@ -134,10 +140,6 @@ class MatrixGenerator:
         for i in range(n):
             for j in range(n):
                 A[i, j] = 1.0 / (i + j + 1)
-
-        # Escalar para atingir o número de condição desejado
-        current_cond = np.linalg.cond(A)
-        scaling_factor = (condition_number / current_cond) ** (1.0 / (2 * n))
 
         # Aplicar perturbação controlada
         U, s, Vt = np.linalg.svd(A)

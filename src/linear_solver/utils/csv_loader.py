@@ -21,7 +21,9 @@ class CSVMatrixLoader:
 
     @staticmethod
     def load_augmented_matrix(
-        filepath: Union[str, Path], delimiter: str = ",", skip_header: bool = False
+        filepath: Union[str, Path],
+        delimiter: str = ",",
+        skip_header: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Carrega sistema linear de matriz aumentada [A|b] de um arquivo CSV.
@@ -32,7 +34,8 @@ class CSVMatrixLoader:
             skip_header: Se deve pular a primeira linha (cabeçalho)
 
         Returns:
-            Tupla (A, b) onde A é a matriz de coeficientes e b o vetor de termos independentes
+            Tupla (A, b) onde A é a matriz de coeficientes e b o vetor de
+            termos independentes
 
         Raises:
             FileNotFoundError: Se o arquivo não existir
@@ -63,7 +66,8 @@ class CSVMatrixLoader:
                                 numeric_row.append(float(cell))
                             except ValueError:
                                 raise ValueError(
-                                    f"Valor não numérico encontrado na linha {row_num}, coluna {col_num + 1}: '{cell}'"
+                                    f"Valor não numérico encontrado na linha "
+                                    f"{row_num}, coluna {col_num + 1}: '{cell}'"
                                 )
 
                     if numeric_row:  # Adicionar apenas linhas não vazias
@@ -83,7 +87,8 @@ class CSVMatrixLoader:
 
             if n_cols < 2:
                 raise ValueError(
-                    "Matriz deve ter pelo menos 2 colunas (coeficientes + termo independente)"
+                    "Matriz deve ter pelo menos 2 colunas (coeficientes + "
+                    "termo independente)"
                 )
 
             # Separar matriz A e vetor b
@@ -93,7 +98,7 @@ class CSVMatrixLoader:
             # Verificar se A é quadrada
             if A.shape[0] != A.shape[1]:
                 raise ValueError(
-                    f"Matriz de coeficientes deve ser quadrada. "
+                    "Matriz de coeficientes deve ser quadrada. "
                     f"Encontrada matriz {A.shape[0]}x{A.shape[1]}"
                 )
 
@@ -137,21 +142,23 @@ class CSVMatrixLoader:
         # Verificar compatibilidade de dimensões
         if A.shape[0] != b.shape[0]:
             raise ValueError(
-                f"Dimensões incompatíveis: matriz A ({A.shape[0]}x{A.shape[1]}) "
-                f"e vetor b ({b.shape[0]})"
+                f"Dimensões incompatíveis: matriz A ({A.shape[0]}x"
+                f"{A.shape[1]}) e vetor b ({b.shape[0]})"
             )
 
         # Verificar se A é quadrada
         if A.shape[0] != A.shape[1]:
             raise ValueError(
-                f"Matriz A deve ser quadrada. Encontrada: {A.shape[0]}x{A.shape[1]}"
+                f"Matriz A deve ser quadrada. Encontrada: {A.shape[0]}x" f"{A.shape[1]}"
             )
 
         return A, b
 
     @staticmethod
     def _load_matrix_from_csv(
-        filepath: Union[str, Path], delimiter: str = ",", skip_header: bool = False
+        filepath: Union[str, Path],
+        delimiter: str = ",",
+        skip_header: bool = False,
     ) -> np.ndarray:
         """Carrega uma matriz de um arquivo CSV."""
         filepath = Path(filepath)
@@ -175,7 +182,8 @@ class CSVMatrixLoader:
                                 numeric_row.append(float(cell))
                             except ValueError:
                                 raise ValueError(
-                                    f"Valor não numérico na matriz, linha {row_num}, coluna {col_num + 1}: '{cell}'"
+                                    f"Valor não numérico na matriz, linha "
+                                    f"{row_num}, coluna {col_num + 1}: '{cell}'"
                                 )
 
                     if numeric_row:
@@ -194,7 +202,9 @@ class CSVMatrixLoader:
 
     @staticmethod
     def _load_vector_from_csv(
-        filepath: Union[str, Path], delimiter: str = ",", skip_header: bool = False
+        filepath: Union[str, Path],
+        delimiter: str = ",",
+        skip_header: bool = False,
     ) -> np.ndarray:
         """Carrega um vetor de um arquivo CSV."""
         filepath = Path(filepath)
@@ -217,7 +227,8 @@ class CSVMatrixLoader:
                                 values.append(float(cell))
                             except ValueError:
                                 raise ValueError(
-                                    f"Valor não numérico no vetor, linha {row_num}, coluna {col_num + 1}: '{cell}'"
+                                    f"Valor não numérico no vetor, linha "
+                                    f"{row_num}, coluna {col_num + 1}: '{cell}'"
                                 )
 
             if not values:

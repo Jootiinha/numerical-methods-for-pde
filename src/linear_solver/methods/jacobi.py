@@ -48,7 +48,10 @@ class JacobiSolver(LinearSolver):
     def get_method_name(self) -> str:
         if not self.is_order2:
             return "Jacobi"
-        return f"Jacobi Ordem 2 (ω₁={self.omega1:.2f}, ω₂={self.omega2:.2f}, ω₃={self.omega3:.2f})"
+        return (
+            f"Jacobi Ordem 2 (ω₁={self.omega1:.2f}, ω₂={self.omega2:.2f}, "
+            f"ω₃={self.omega3:.2f})"
+        )
 
     def solve(
         self, A: np.ndarray, b: np.ndarray, x0: Optional[np.ndarray] = None
@@ -62,7 +65,6 @@ class JacobiSolver(LinearSolver):
         if np.any(np.abs(diagonal_values) < 1e-14):
             raise ValueError("Matriz A deve ter diagonal principal não-nula")
 
-        n = A.shape[0]
         x = self._get_initial_guess(A, x0)
         x_prev = x.copy()
 
@@ -86,8 +88,8 @@ class JacobiSolver(LinearSolver):
             else:
                 x_new = x_jacobi
 
-            error = np.linalg.norm(x_new - x, ord=np.inf)
-            residual = np.linalg.norm(A @ x_new - b)
+            error = float(np.linalg.norm(x_new - x, ord=np.inf))
+            residual = float(np.linalg.norm(A @ x_new - b))
 
             self.convergence_history.append(error)
             residual_history.append(residual)
@@ -104,7 +106,7 @@ class JacobiSolver(LinearSolver):
 
             x_prev, x = x, x_new
 
-        final_residual = np.linalg.norm(A @ x - b)
+        final_residual = float(np.linalg.norm(A @ x - b))
         return self._create_convergence_info(
             converged=False,
             iterations=self.max_iterations,
@@ -153,12 +155,14 @@ class JacobiSolver(LinearSolver):
         M_jacobi = -D_inv @ L_plus_U
 
         if self.is_order2:
-            # Para ordem 2, a "matriz de iteração" não é fixa, mas esta é uma aproximação linear
-            I = np.eye(A.shape[0])
-            return (
+            # Para ordem 2, a "matriz de iteração" não é fixa, mas esta é
+            # uma aproximação linear
+            identity_matrix = np.eye(A.shape[0])
+            iteration_matrix = (
                 self.omega1 * M_jacobi
-                + self.omega2 * I
+                + self.omega2 * identity_matrix
                 + self.omega3 * np.linalg.matrix_power(M_jacobi, 2)
             )
+            return np.asarray(iteration_matrix)
 
-        return M_jacobi
+        return np.asarray(M_jacobi)

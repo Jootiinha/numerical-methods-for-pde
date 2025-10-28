@@ -20,16 +20,20 @@ class LinearSolver(ABC):
         Inicializa o resolvedor.
 
         Args:
-            tolerance: Tolerância para critério de convergência (padrão: 1e-4 = 10^(-4))
+            tolerance: Tolerância para critério de convergência
+            (padrão: 1e-4 = 10^(-4))
             max_iterations: Número máximo de iterações
         """
         self.tolerance = tolerance
         self.max_iterations = max_iterations
-        self.convergence_history = []
+        self.convergence_history: list[float] = []
 
     @abstractmethod
     def solve(
-        self, A: np.ndarray, b: np.ndarray, x0: Optional[np.ndarray] = None
+        self,
+        A: np.ndarray,
+        b: np.ndarray,
+        x0: Optional[np.ndarray] = None,
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """
         Resolve o sistema linear Ax = b.
@@ -75,7 +79,7 @@ class LinearSolver(ABC):
             True se converged, False caso contrário
         """
         error = np.linalg.norm(x_new - x_old, ord=np.inf)
-        return error < self.tolerance
+        return bool(error < self.tolerance)
 
     def _validate_inputs(self, A: np.ndarray, b: np.ndarray) -> None:
         """

@@ -46,7 +46,8 @@ class GaussSeidelSolver(LinearSolver):
         if self.is_order2:
             return (
                 f"Gauss-Seidel Ordem 2 (ω_relax={self.relaxation_factor:.2f}, "
-                f"ω₁={self.omega1:.2f}, ω₂={self.omega2:.2f}, ω₃={self.omega3:.2f})"
+                f"ω₁={self.omega1:.2f}, ω₂={self.omega2:.2f}, "
+                f"ω₃={self.omega3:.2f})"
             )
         if self.is_sor:
             return f"SOR (ω={self.relaxation_factor:.2f})"
@@ -90,8 +91,8 @@ class GaussSeidelSolver(LinearSolver):
             else:
                 x_new = x_sor
 
-            error = np.linalg.norm(x_new - x, ord=np.inf)
-            residual = np.linalg.norm(A @ x_new - b)
+            error = float(np.linalg.norm(x_new - x, ord=np.inf))
+            residual = float(np.linalg.norm(A @ x_new - b))
             self.convergence_history.append(error)
             residual_history.append(residual)
 
@@ -107,7 +108,7 @@ class GaussSeidelSolver(LinearSolver):
 
             x_prev, x = x, x_new
 
-        final_residual = np.linalg.norm(A @ x - b)
+        final_residual = float(np.linalg.norm(A @ x - b))
         return self._create_convergence_info(
             converged=False,
             iterations=self.max_iterations,
@@ -135,12 +136,20 @@ class GaussSeidelSolver(LinearSolver):
             "convergence_history": self.convergence_history.copy(),
             "residual_history": residual_history.copy(),
         }
+        params: Dict[str, float] = {}
         if self.is_sor or self.is_order2:
-            info["parameters"] = {"relaxation_factor": self.relaxation_factor}
+            params["relaxation_factor"] = self.relaxation_factor
         if self.is_order2:
-            info["parameters"].update(
-                {"omega1": self.omega1, "omega2": self.omega2, "omega3": self.omega3}
+            params.update(
+                {
+                    "omega1": self.omega1,
+                    "omega2": self.omega2,
+                    "omega3": self.omega3,
+                }
             )
+
+        if params:
+            info["parameters"] = params
 
         return solution.copy(), info
 
@@ -154,7 +163,8 @@ class GaussSeidelSolver(LinearSolver):
         D_plus_omega_L = D + self.relaxation_factor * L
         if np.linalg.det(D_plus_omega_L) == 0:
             raise ValueError(
-                "Matriz (D + ωL) é singular, não é possível calcular a matriz de iteração."
+                "Matriz (D + ωL) é singular, não é possível calcular a "
+                "matriz de iteração."
             )
 
         D_plus_omega_L_inv = np.linalg.inv(D_plus_omega_L)
@@ -162,11 +172,12 @@ class GaussSeidelSolver(LinearSolver):
         M_sor = D_plus_omega_L_inv @ rhs
 
         if self.is_order2:
-            I = np.eye(A.shape[0])
-            return (
+            identity_matrix = np.eye(A.shape[0])
+            iteration_matrix = (
                 self.omega1 * M_sor
-                + self.omega2 * I
+                + self.omega2 * identity_matrix
                 + self.omega3 * np.linalg.matrix_power(M_sor, 2)
             )
+            return np.asarray(iteration_matrix)
 
-        return M_sor
+        return np.asarray(M_sor)

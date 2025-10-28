@@ -82,7 +82,7 @@ class MatrixValidator:
         Returns:
             Número de condição
         """
-        return np.linalg.cond(A)
+        return float(np.linalg.cond(A))
 
     @staticmethod
     def analyze_matrix(A: np.ndarray) -> Dict[str, Any]:
