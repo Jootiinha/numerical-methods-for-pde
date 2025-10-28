@@ -396,6 +396,133 @@ class NonLinearSystemExample:
         except Exception as e:
             print(f"⚠️  Erro ao criar visualizações: {e}")
 
+    def generate_attraction_basin(self, args: Any):
+        """
+        Gera e visualiza o mapa de bacias de atração.
+
+        Esta é uma ferramenta de visualização que mostra para qual raiz um
+        método iterativo (neste caso, Newton) converge a partir de uma grade
+        de diferentes pontos iniciais. Não é um método de resolução em si,
+        mas uma análise do comportamento do solucionador.
+        """
+        print("\n🌊 Gerando Mapa de Bacias de Atração...")
+        print("   - Esta é uma ferramenta de visualização para analisar o comportamento do método de Newton.")
+        print("   - Cada ponto no mapa representa um chute inicial; a cor indica para qual raiz ele converge.")
+
+        # 1. Encontrar as raízes do sistema
+        print("   - Identificando raízes do sistema...")
+        roots = self._find_system_roots(args)
+        
+        if not roots:
+            print("   - ⚠️ Nenhuma raiz encontrada. Não é possível gerar o mapa.")
+            return
+            
+        print(f"   - {len(roots)} raízes encontradas:")
+        for i, root in enumerate(roots):
+            print(f"     Raiz {i+1}: [{root[0]:.6f}, {root[1]:.6f}, {root[2]:.6f}]")
+
+        # 2. Configurar a grade 2D
+        # Por enquanto, vamos fixar z=0 e variar x e y
+        grid_size = args.basin_resolution
+        x_range = np.linspace(-2, 4, grid_size)
+        y_range = np.linspace(-2, 4, grid_size)
+        z_fixed = 0.0
+        
+        basin_map = np.zeros((grid_size, grid_size), dtype=int)
+        
+        solver = NewtonSolver(tolerance=args.tolerance, max_iterations=args.max_iterations)
+
+        # 3. Iterar sobre a grade e classificar cada ponto
+        print(f"   - Varrendo uma grade de {grid_size}x{grid_size} pontos...")
+        
+        for i, y in enumerate(y_range):
+            for j, x in enumerate(x_range):
+                x0 = np.array([x, y, z_fixed])
+                
+                try:
+                    solution, info = solver.solve(self.system_function, self.jacobian_function, x0)
+                    
+                    if info['converged']:
+                        # Encontrar a raiz mais próxima
+                        distances = [np.linalg.norm(solution - root) for root in roots]
+                        closest_root_idx = np.argmin(distances)
+                        
+                        # Verificar se está realmente perto da raiz
+                        if distances[closest_root_idx] < 1e-3:
+                            basin_map[i, j] = closest_root_idx + 1
+                        else:
+                            basin_map[i, j] = 0 # Convergiu para um ponto desconhecido
+                    else:
+                        basin_map[i, j] = -1 # Não convergiu
+                except Exception:
+                    basin_map[i, j] = -2 # Erro na execução
+
+        # 4. Visualizar o mapa
+        print("   - Gerando visualização do mapa...")
+        plt.figure(figsize=(10, 8))
+        
+        # Usar um mapa de cores discreto
+        cmap = plt.cm.get_cmap('viridis', len(roots) + 3)
+        
+        plt.imshow(basin_map, extent=[x_range[0], x_range[-1], y_range[0], y_range[-1]], 
+                   origin='lower', cmap=cmap, interpolation='nearest')
+        
+        # Adicionar legenda de cores
+        cbar = plt.colorbar()
+        tick_locs = np.arange(-2, len(roots) + 1) + 0.5 * (len(roots)+2)/(len(roots)+3)
+        cbar.set_ticks(tick_locs)
+        
+        labels = ['Erro', 'Não Convergiu', 'Desconhecido'] + [f'Raiz {i+1}' for i in range(len(roots))]
+        cbar.set_ticklabels(labels)
+
+        plt.title(f'Bacias de Atração (plano z={z_fixed})')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        
+        # Plotar as raízes no mapa (se estiverem no plano)
+        for i, root in enumerate(roots):
+            if np.isclose(root[2], z_fixed):
+                plt.plot(root[0], root[1], 'r*', markersize=10, label=f'Raiz {i+1}' if i == 0 else "")
+
+        if any(np.isclose(r[2], z_fixed) for r in roots):
+            plt.legend()
+
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        plot_filename = self.results_dir / f"basin_map_{timestamp}.png"
+        plt.savefig(plot_filename, dpi=300, bbox_inches='tight')
+        plt.show()
+        
+        print(f"   - ✅ Mapa salvo em: {plot_filename}")
+
+    def _find_system_roots(self, args: Any, num_guesses: int = 100) -> List[np.ndarray]:
+        """
+        Tenta encontrar as raízes do sistema a partir de várias aproximações iniciais.
+        """
+        solver = NewtonSolver(tolerance=1e-8, max_iterations=args.max_iterations)
+        roots = []
+        
+        # Gerar pontos iniciais aleatórios num espaço maior
+        initial_guesses = np.random.uniform(-5, 5, size=(num_guesses, 3))
+        
+        for x0 in initial_guesses:
+            try:
+                solution, info = solver.solve(self.system_function, self.jacobian_function, x0)
+                
+                if info['converged']:
+                    # Verificar se a raiz é nova
+                    is_new_root = True
+                    for existing_root in roots:
+                        if np.linalg.norm(solution - existing_root) < 1e-4:
+                            is_new_root = False
+                            break
+                    
+                    if is_new_root:
+                        roots.append(solution)
+            except Exception:
+                continue # Ignorar erros durante a busca por raízes
+                
+        return roots
+
 
 def solve_nonlinear_system(args: Any):
     """
@@ -407,9 +534,12 @@ def solve_nonlinear_system(args: Any):
     # Executar exemplo não linear
     try:
         example = NonLinearSystemExample()
-        
-        # Executar com os argumentos da CLI
-        example.run_methods(args)
+
+        if args.basin_map:
+            example.generate_attraction_basin(args)
+        else:
+            # Executar com os argumentos da CLI
+            example.run_methods(args)
         
         print(f"\n✅ Sistema não linear processado com sucesso!")
         print(f"📁 Resultados salvos em: ./results/nonlinear/")

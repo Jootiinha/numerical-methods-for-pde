@@ -66,6 +66,12 @@ def parse_arguments():
                                  help='Executar método do Gradiente (requer --nonlinear)')
     nonlinear_group.add_argument('--iteration', action='store_true',
                                  help='Executar método de Iteração (requer --nonlinear)')
+    
+    # Bacias de atração
+    nonlinear_group.add_argument('--basin-map', action='store_true',
+                                 help='Gerar mapa de bacias de atração (requer --nonlinear)')
+    nonlinear_group.add_argument('--basin-resolution', type=int, default=100,
+                                 help='Resolução da grade para o mapa de bacias (padrão: 100)')
 
     args = parser.parse_args()
     
@@ -74,9 +80,9 @@ def parse_arguments():
         parser.error("--visualize-benchmark requer --benchmark")
 
     # Validar dependências de argumentos não lineares
-    is_nonlinear_method_selected = any([args.newton, args.gradient, args.iteration])
+    is_nonlinear_method_selected = any([args.newton, args.gradient, args.iteration, args.basin_map])
     if is_nonlinear_method_selected and not args.nonlinear:
-        parser.error("Argumentos como --newton, --gradient e --iteration requerem --nonlinear")
+        parser.error("Argumentos como --newton, --gradient, --iteration e --basin-map requerem --nonlinear")
     
     # Se nenhum método foi especificado (e não é benchmark ou não linear), usar --all
     is_method_selected = any([

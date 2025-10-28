@@ -89,7 +89,7 @@ class GradientSolver(NonLinearSolver):
             # Verificar convergência do gradiente
             if grad_norm < self.tolerance:
                 info = {
-                    'converged': True,
+                    'converged': False,
                     'iterations': iteration + 1,
                     'final_function_norm': f_norm,
                     'final_gradient_norm': grad_norm,
@@ -98,6 +98,7 @@ class GradientSolver(NonLinearSolver):
                     'convergence_history': self.convergence_history.copy(),
                     'residual_history': residual_history.copy(),
                     'step_size_history': step_size_history.copy(),
+                    'error_message': 'Gradiente pequeno - possível mínimo local ou ponto de sela',
                     'solution_x': x.copy()
                 }
                 return x.copy(), info
@@ -135,7 +136,7 @@ class GradientSolver(NonLinearSolver):
             # Verificar convergência do passo
             if self._check_convergence(x_new, x):
                 info = {
-                    'converged': True,
+                    'converged': False,
                     'iterations': iteration + 1,
                     'final_function_norm': f_norm,
                     'final_gradient_norm': grad_norm,
@@ -144,6 +145,7 @@ class GradientSolver(NonLinearSolver):
                     'convergence_history': self.convergence_history.copy(),
                     'residual_history': residual_history.copy(),
                     'step_size_history': step_size_history.copy(),
+                    'error_message': 'Passo muito pequeno - estagnação',
                     'solution_x': x_new.copy()
                 }
                 return x_new.copy(), info
