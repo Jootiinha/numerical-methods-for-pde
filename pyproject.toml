@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-packages = [{include = "linear_solver"}]
+packages = [{include = "linear_solver", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
