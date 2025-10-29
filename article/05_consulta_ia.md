@@ -334,3 +334,4 @@ A integração de IA com métodos numéricos representa uma evolução natural d
 As aplicações discutidas nesta seção - desde otimização de parâmetros até desenvolvimento assistido por IA - demonstram como a inteligência artificial pode complementar e potencializar os métodos tradicionais, criando soluções híbridas mais robustas e eficientes.
 
 O futuro da computação científica provavelmente verá uma integração cada vez mais profunda entre IA e métodos numéricos, resultando em ferramentas mais inteligentes, adaptativas e eficientes para resolver os desafios computacionais do século XXI.
+

@@ -915,3 +915,4 @@ class NonLinearSystemExample:
 ```
 
 Este apêndice apresenta os algoritmos computacionais completos implementados para cada método discutido no trabalho. Os códigos incluem tratamento de erros, validação de entradas, monitoramento de convergência e interfaces padronizadas que facilitam a comparação e uso dos diferentes métodos.
+

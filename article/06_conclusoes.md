@@ -111,3 +111,4 @@ A integração de boas práticas de desenvolvimento de software com implementaç
 O futuro da computação científica provavelmente verá uma integração cada vez mais profunda entre métodos numéricos tradicionais e técnicas emergentes de IA, como discutido na seção anterior. Este trabalho estabelece uma base sólida para tais desenvolvimentos futuros, fornecendo implementações robustas e bem estruturadas que podem ser estendidas e melhoradas com técnicas avançadas.
 
 Em conclusão, este trabalho contribui significativamente para o campo de métodos numéricos, oferecendo não apenas implementações práticas e eficientes, mas também uma metodologia de desenvolvimento que pode ser aplicada a outros problemas computacionais. A combinação de rigor científico, qualidade de software e análise empírica robusta estabelece um padrão para trabalhos futuros na área.
+

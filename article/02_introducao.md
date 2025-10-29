@@ -109,3 +109,4 @@ Este artigo está organizado da seguinte forma:
 **Apêndice**: Contém os algoritmos computacionais completos implementados para cada método, servindo como referência técnica detalhada.
 
 Esta estrutura permite uma progressão lógica desde os fundamentos teóricos até as aplicações práticas, culminando em uma discussão sobre o futuro da área e as contribuições específicas deste trabalho.
+

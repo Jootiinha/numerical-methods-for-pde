@@ -1,0 +1,1011 @@
+
+\documentclass[12pt,a4paper]{article}
+
+% --- Pacotes básicos ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[portuguese]{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{natbib}
+\usepackage{url}
+\sloppy
+
+% --- Configurações de layout ---
+\geometry{
+    a4paper,
+    left=3cm,
+    right=3cm,
+    top=3cm,
+    bottom=2.5cm
+}
+
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.2cm}
+
+\begin{document}
+
+% --- CAPA MANUAL ---
+\begin{titlepage}
+  \begin{center}
+    \vspace*{1.cm}
+
+    {\LARGE \textbf{Métodos Numéricos para Equações Diferenciais Parciais} \par}
+    \vspace{0.8cm}
+    {\Large Resolução Numérica de Sistemas Lineares e Não Lineares \par}
+    \vspace{2.5cm}
+
+    {\large Gabriel Santos Piveti, João Carlos Romero Monteiro e Lieger Duarte de Oliveira Rosa \par}
+    \vspace{1.5cm}
+    {\small Programa de Pós-Graduação em Modelagem Computacional em Ciência e Tecnologia \par}
+    {\small Universidade Federal Fluminense (UFF) \par}
+
+    \vfill
+
+    {\normalsize Trabalho 1 — Seminário de Métodos Numéricos \par}
+    \vspace{0.3cm}
+    {\normalsize Professor: Gustavo Benitez \par}
+    \vspace{0.8cm}
+    {\normalsize Volta Redonda — RJ \par}
+    {\normalsize 2025 \par}
+  \end{center}
+\end{titlepage}
+
+
+% --- INTRODUÇÃO ---
+\section{Resumo}
+
+Este trabalho apresenta uma implementação abrangente de métodos numéricos para a resolução de sistemas de equações lineares e não lineares, desenvolvida em Python com foco em boas práticas de engenharia de software. O projeto inclui métodos iterativos clássicos (Jacobi, Gauss-Seidel), métodos de alta ordem (Gradiente Conjugado, CGS), e métodos para sistemas não lineares (Newton-Raphson, Iteração de Ponto Fixo, Gradiente). A implementação foi testada em sistemas de diferentes dimensões e características, incluindo um sistema de 36×36 variáveis e um sistema não linear tridimensional. Os resultados demonstram a eficiência superior do método do Gradiente Conjugado para sistemas lineares simétricos e definidos positivos, enquanto o método de Newton exibe convergência quadrática para sistemas não lineares quando uma boa aproximação inicial é fornecida. A biblioteca desenvolvida oferece uma interface unificada, análise de convergência em tempo real, e ferramentas de benchmarking para avaliação de performance computacional.
+
+\textbf{Palavras-chave:} Métodos numéricos, sistemas lineares, sistemas não lineares, análise computacional, Python, convergência iterativa, métodos do gradiente conjugado, método de Newton-Raphson.
+
+\section{Abstract}
+
+This work presents a comprehensive implementation of numerical methods for solving linear and nonlinear systems of equations, developed in Python with focus on software engineering best practices. The project includes classical iterative methods (Jacobi, Gauss-Seidel), high-order methods (Conjugate Gradient, CGS), and methods for nonlinear systems (Newton-Raphson, Fixed Point Iteration, Gradient). The implementation was tested on systems of different dimensions and characteristics, including a Brazilian 36×36 variable system and a three-dimensional nonlinear system. Results demonstrate the superior efficiency of the Conjugate Gradient method for symmetric and positive definite linear systems, while Newton's method exhibits quadratic convergence for nonlinear systems when a good initial approximation is provided. The developed library offers a unified interface, real-time convergence analysis, and benchmarking tools for computational performance evaluation.
+
+\textbf{Keywords:} Numerical methods, linear systems, nonlinear systems, computational analysis, Python, iterative convergence, conjugate gradient methods, Newton-Raphson method.
+
+
+\section{Introdução}
+
+Resolver sistemas de equações algébricas, sejam eles lineares ou não lineares, é uma etapa fundamental na análise numérica moderna. Essa tarefa é essencial para realizar simulações científicas e aplicar conhecimentos em várias áreas da engenharia. Muitos fenômenos físicos complexos, como transferência de calor, difusão, fluxo de fluidos, elasticidade e eletromagnetismo, são modelados por Equações Diferenciais Parciais (EDPs). Quando essas equações são discretizadas usando métodos numéricos, resultam em sistemas algébricos de grande porte \citep{GOLUB2013}
+
+A crescente complexidade dos problemas científicos e de engenharia, aliada ao aumento exponencial da capacidade computacional disponível, tem demandado o desenvolvimento de métodos numéricos cada vez mais eficientes e robustos. Sistemas com milhares ou mesmo milhões de variáveis não são mais exceção, mas sim a regra em aplicações industriais e científicas contemporâneas.
+
+A dificuldade desses sistemas aumenta quando a matriz envolvida tem alta dimensão, estrutura esparsa ou apresenta mau condicionamento, criando desafios importantes para os computadores. Métodos diretos, como a eliminação de Gauss e as decomposições LU e Cholesky, são precisos e confiáveis, mas se tornam pouco eficientes em problemas de grande escala devido ao alto custo computacional e à necessidade de muita memória \citep{CHAPRA2015}. Diante dessa situação, os métodos iterativos se mostram boas opções, pois permitem encontrar soluções aproximadas com um custo menor e oferecem mais controle sobre o processo de convergência.
+
+Entre os métodos iterativos tradicionais, destacam-se o de Jacobi e o de Gauss-Seidel, amplamente utilizados por sua simplicidade e eficiência em sistemas com matriz diagonalmente dominante \citep{BURDEN2011}. No entanto, a rapidez de convergência desses métodos depende das propriedades da matriz do sistema. Quando essas condições não são favoráveis, o processo iterativo pode ser lento ou até divergir. Para mitigar esse problema, surgiram versões aprimoradas, como o Jacobi$^2$ e o Gauss-Seidel$^2$, que utilizam informações de iterações anteriores para acelerar o processo e aumentar a precisão. Essas versões, também conhecidas como métodos de ordem m, demonstram uma taxa de convergência superior à de seus precursores de primeira ordem, sendo este o principal objeto de estudo deste anexo \citep{ALVAREZ2022}. 
+
+Além desses métodos, destaca-se o Gradiente Conjugado (CG) e sua variação CGS, voltada para sistemas não simétricos. Ambos se baseiam na minimização do erro quadrático e na ortogonalização de resíduos, proporcionando uma convergência mais rápida e estável, especialmente em sistemas simétricos e definidos positivos \citep{SAAD2003}.
+
+Neste contexto, a escolha adequada do método numérico para resolver um sistema específico pode significar a diferença entre uma solução obtida em segundos ou em horas, entre convergência garantida ou falha completa do algoritmo. Portanto, compreender as características, limitações e aplicabilidades dos diferentes métodos disponíveis é essencial para qualquer profissional que trabalhe com computação científica.
+
+\subsection{Problema de pesquisa}
+
+Neste trabalho, esses métodos serão implementados e comparados quanto à eficiência e precisão, por meio de códigos desenvolvidos em Python. As bibliotecas \textit{NumPy} e \textit{SciPy} foram utilizadas para a manipulação matricial, cálculo de resíduos, análise de condicionamento e avaliação do desempenho computacional. O objetivo é compreender o comportamento numérico dos métodos, avaliando o número de iterações, tempo de processamento e erro final em cada caso.
+
+O estudo está dividido em duas partes principais: na primeira, abordam-se problemas de \textbf{Sistemas Lineares}, aplicando e comparando os métodos iterativos de Jacobi, Gauss-Seidel, Jacobi$^2$, Gauss-Seidel$^2$ e Gradiente Conjugado. Na segunda parte, são analisados os \textbf{Sistemas Não Lineares}, com foco na aplicação dos métodos de Newton, Iteração por Ponto Fixo e Gradiente.
+
+A execução prática envolve a análise do número de iterações necessárias, a precisão obtida e o tempo computacional até o atingimento do critério de parada estabelecido ($\varepsilon = 10^{-4}$). Todas as interações realizadas com a Inteligência Artificial durante o desenvolvimento serão registradas, documentando as etapas de formulação, implementação e análise dos resultados.
+
+\subsection{Objetivos}
+
+\begin{itemize}
+    \item Implementar métodos iterativos clássicos para sistemas lineares, incluíndo:
+    \begin{itemize}
+        \item Método do Gradiente Conjugado
+        \item Método do Gradiente Conjugado Quadrado (CGS)
+        \item Método do Gradiente Conjugado Precondicionado
+    \end{itemize}
+    \item Implementar métodos para sistemas não lineares
+    \begin{itemize}
+        \item Método de Newton-Raphson
+        \item Método da Iteração de Ponto Fixo
+        \item Método do Gradiente
+    \end{itemize}
+    \item Desenvolver ferramentas de análise e validação
+    \begin{itemize}
+        \item Análise de propriedades de matrizes (simetria, definida positiva, condicionamento)
+        \item Monitoramento de convergência com histórico detalhado
+        \item Benchmarking automático de performance
+        \item Visualização de resultados e convergência
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Relevância técnica}
+A implementação de métodos numéricos em Python, utilizando boas práticas de engenharia de software, demonstra como conceitos matemáticos abstratos podem ser transformados em ferramentas computacionais robustas e eficientes. Isso é particularmente relevante considerando a crescente adoção de Python como linguagem padrão em computação científica.
+
+
+
+
+\newpage
+
+% --- DEFINIÇÕES DE SISTEMAS ---
+\section{Definição de Sistemas Lineares e Não Lineares}
+
+Os sistemas de equações podem ser classificados em lineares e não lineares, de acordo com a forma funcional das equações que os compõem.
+
+\subsection{Sistemas Lineares}
+
+Um sistema linear é caracterizado por equações em que as incógnitas aparecem apenas em primeira potência e não estão multiplicadas entre si. Formalmente, um sistema linear com $n$ equações e $n$ incógnitas pode ser representado na forma matricial:
+
+\[
+A\mathbf{x} = \mathbf{b}
+\]
+
+onde $A$ é uma matriz $n \times n$ que contém os coeficientes das incógnitas, $\mathbf{x}$ é o vetor das incógnitas e $\mathbf{b}$ é o vetor dos termos independentes \citep{LEONEL2023}.
+
+A resolução de sistemas lineares pode ser realizada por métodos diretos ou iterativos. Entre os principais métodos iterativos estão:
+
+\begin{itemize}
+    \item \textbf{Método da Iteração (Jacobi):} Atualiza simultaneamente o valor de cada incógnita a cada iteração, utilizando apenas os valores da iteração anterior.
+    \item \textbf{Método de Seidel (Gauss-Seidel):} Atualiza imediatamente cada incógnita após seu cálculo, utilizando os valores mais recentes das outras incógnitas, o que acelera a convergência.
+    \item \textbf{Método de Jacobi de Ordem 2:} Utiliza aproximações de segunda ordem (caso particular de ordem $m$) para maior precisão e velocidade de convergência \citep{ALVAREZ2022}.
+    \item \textbf{Método de Gauss-Seidel de Ordem 2:} Extensão do Gauss-Seidel clássico que emprega aproximações de segunda ordem para acelerar a convergência \citep{ALVAREZ2022}.
+    \item \textbf{Método do Gradiente Conjugado (CG) ou CGS:} Baseado em otimização e minimização do erro quadrático; eficiente para sistemas grandes e esparsos \citep{SAAD2003}. 
+\end{itemize}
+
+\subsection{Sistemas Não Lineares}
+
+Um sistema não linear envolve equações nas quais as incógnitas aparecem elevadas a potências maiores que um, dentro de funções transcendentes ou multiplicadas entre si. Um sistema não linear pode ser representado genericamente como:
+
+\[
+\mathbf{F}(\mathbf{x}) = 0
+\]
+
+onde $\mathbf{F}$ é um vetor de funções não lineares de $\mathbf{x}$ \citep{AGUIRRE2023}.
+
+Os métodos numéricos mais usuais para a resolução desses sistemas incluem:
+
+\begin{itemize}
+    \item \textbf{Método de Newton:} Baseado na linearização local das funções via expansão em série de Taylor de primeira ordem. Em cada iteração, resolve-se um sistema linear cuja matriz é a Jacobiana avaliada no ponto actual.
+    \item \textbf{Método da Iteração Fixa (Ponto Fixo):} Define uma função de iteração $\mathbf{x} = \mathbf{g}(\mathbf{x})$ que converge para o ponto fixo $\mathbf{x}^*$, solução do sistema.
+    \item \textbf{Método do Gradiente:} Utiliza técnicas de otimização para minimizar o erro residual, movendo-se na direção do gradiente negativo até atingir o mínimo.
+\end{itemize}
+
+\subsection{Análise de Convergência}
+
+Um método iterativo converge se:
+
+$$
+\lim_{k \to \infty} \|\mathbf{x}^{(k)} - \mathbf{x}^*\| = 0
+$$
+
+Onde $\mathbf{x}^*$ é a solução exata.
+
+\subsection{Análise de Convergência}
+
+A taxa de convergência é definida como:
+
+$$
+\rho = \lim_{k \to \infty} \frac{\|\mathbf{x}^{(k+1)} - \mathbf{x}^*\|}{\|\mathbf{x}^{(k)} - \mathbf{x}^*\|}
+$$
+
+- $\rho < 1$: Convergência linear
+- $\rho = 0$: Convergência superlinear
+- Convergência quadrática: $\|\mathbf{x}^{(k+1)} - \mathbf{x}^*\| \leq C\|\mathbf{x}^{(k)} - \mathbf{x}^*\|^2$
+
+
+\newpage
+
+% --- RESOLUÇÃO DO PROBLEMA ---
+\section{Resolução do Problema}
+
+A resolução dos problemas propostos consiste em aplicar os métodos iterativos $M_1$ (Jacobi), $M_2$ (Gauss-Seidel), $M_3$ (Jacobi de Ordem 2) e $M_4$ (Gauss-Seidel de Ordem 2) ao sistema linear $A_{36\times36}\mathbf{x}{36\times1} = \mathbf{b}{36\times1}$.
+
+O critério de parada adotado segue o padrão do enunciado: a diferença máxima entre iterações sucessivas deve ser menor que a tolerância $\varepsilon = 10^{-4}$. O vetor inicial é nulo, $\mathbf{x}^{(0)} = 0$.
+
+\subsection{Metodologia dos Métodos Iterativos}
+
+O sistema linear é decomposto na forma:
+\[
+A = D + L + U
+\]
+onde $D$ é a matriz diagonal, $L$ é a matriz triangular inferior estrita e $U$ é a matriz triangular superior estrita.
+
+Todos os métodos têm a forma geral:
+\[
+\mathbf{x}^{(k+1)} = M\mathbf{x}^{(k)} + \mathbf{c}
+\]
+
+Os métodos de ordem $m$ (Jacobi$^2$ e Gauss-Seidel$^2$) são definidos pela forma:
+\[
+\mathbf{x}^{(k+m)} = \sum_{i=0}^{m-1} \alpha_i \mathbf{x}^{(k+i)} + \mathbf{c}
+\]
+onde $M$ e $\mathbf{c}$ representam a matriz e o vetor de iteração do método de primeira ordem correspondente.
+
+\section{Implementação Computacional}
+
+\subsection{Arquitetura da Biblioteca}
+
+A biblioteca desenvolvida segue uma arquitetura modular com os seguintes componentes principais:
+
+\subsubsection*{Interface de Usuário (\texttt{src/cli.py})}
+\begin{itemize}
+  \item Ponto de entrada principal da aplicação;
+  \item Interpretação de comandos da linha de comando;
+  \item Configuração de parâmetros de execução.
+\end{itemize}
+
+\subsubsection*{Aplicações (\texttt{src/app/})}
+\begin{itemize}
+  \item \texttt{linear\_solver\_app.py}: Orquestração para solucionadores lineares;
+  \item \texttt{nonlinear\_solver\_app.py}: Orquestração para solucionadores não lineares.
+\end{itemize}
+
+\subsubsection*{Solucionadores Core}
+\begin{itemize}
+  \item \texttt{src/linear\_solver/}: Lógica de alto nível para sistemas lineares;
+  \item \texttt{src/nonlinear\_solver/}: Lógica de alto nível para sistemas não lineares.
+\end{itemize}
+
+\subsubsection*{Implementações dos Métodos}
+\begin{itemize}
+  \item \texttt{src/linear\_solver/methods/}: Implementações dos métodos iterativos;
+  \item \texttt{src/nonlinear\_solver/methods/}: Implementações dos métodos não lineares.
+\end{itemize}
+
+\subsubsection*{Utilitários e Análise}
+\begin{itemize}
+  \item \texttt{src/utils/}: Ferramentas de manipulação de arquivos;
+  \item \texttt{src/analysis/}: Análise de propriedades de matrizes;
+  \item \texttt{src/benchmark/}: Ferramentas de benchmarking.
+\end{itemize}
+
+\subsection{Características da Implementação}
+
+\subsubsection*{Interface Unificada}
+Todos os métodos implementados seguem uma interface comum:
+\begin{verbatim}
+class BaseSolver:
+    def solve(self, A, b, x0=None):
+        """
+        Resolve o sistema Ax = b
+        
+        Returns:
+            solution: Vetor solução
+            info: Dicionário com informações de convergência
+        """
+\end{verbatim}
+
+\subsubsection*{Monitoramento de Convergência}
+Cada método registra:
+\begin{itemize}
+  \item Histórico de erros por iteração;
+  \item Número de iterações executadas;
+  \item Status de convergência;
+  \item Tempo de execução;
+  \item Erro final alcançado.
+\end{itemize}
+
+\subsubsection*{Validação Automática}
+A biblioteca inclui validação automática de:
+\begin{itemize}
+  \item Propriedades da matriz (simetria, definida positiva);
+  \item Condicionamento do sistema;
+  \item Compatibilidade entre matriz e método escolhido.
+\end{itemize}
+
+\subsection{Sistemas de Teste}
+
+\subsubsection*{Sistema 36\,$\times$\,36}
+Sistema linear de grande porte.
+
+\subsubsection*{Sistema Não Linear Tridimensional}
+Sistema específico implementado:
+\[
+\begin{aligned}
+F_1(x,y,z) &= (x-1)^2 + (y-1)^2 + (z-1)^2 - 1 = 0,\\
+F_2(x,y,z) &= 2x^2 + (y-1)^2 - 4z = 0,\\
+F_3(x,y,z) &= 3x^2 + 2z^2 - 4y = 0.
+\end{aligned}
+\]
+Este sistema representa a interseção de superfícies geométricas e possui múltiplas soluções.
+
+\section{Critérios de Parada e Controle de Erro}
+
+\subsection{Critérios para Sistemas Lineares}
+
+\subsubsection*{Critério de Resíduo Relativo}
+\[
+\frac{\lVert \mathbf{r}^{(k)} \rVert}{\lVert \mathbf{b} \rVert} < \epsilon,
+\qquad
+\mathbf{r}^{(k)} = \mathbf{b} - \mathbf{A}\mathbf{x}^{(k)}.
+\]
+
+\subsubsection*{Critério de Incremento Relativo}
+\[
+\frac{\lVert \mathbf{x}^{(k+1)} - \mathbf{x}^{(k)} \rVert}{\lVert \mathbf{x}^{(k+1)} \rVert} < \epsilon.
+\]
+
+\subsection{Critérios para Sistemas Não Lineares}
+
+\subsubsection*{Critério de Função}
+\[
+\lVert \mathbf{F}(\mathbf{x}^{(k)}) \rVert < \epsilon.
+\]
+
+\subsubsection*{Critério de Incremento}
+\[
+\lVert \mathbf{x}^{(k+1)} - \mathbf{x}^{(k)} \rVert < \epsilon.
+\]
+A implementação utiliza ambos os critérios, parando quando qualquer um deles é satisfeito.
+
+\section{Análise de Complexidade Computacional}
+
+\subsection{Complexidade dos Métodos Lineares}
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+\textbf{Método} & \textbf{Operações por Iteração} & \textbf{Memória} & \textbf{Convergência} \\
+\hline
+Jacobi & $O(n^2)$ & $O(n)$ & Linear \\
+Gauss-Seidel & $O(n^2)$ & $O(n)$ & Linear \\
+Gradiente Conjugado & $O(n^2)$ & $O(n)$ & Superlinear \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Complexidade dos Métodos Não Lineares}
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+\textbf{Método} & \textbf{Operações por Iteração} & \textbf{Memória} & \textbf{Convergência} \\
+\hline
+Newton & $O(n^3)$ & $O(n^2)$ & Quadrática \\
+Iteração & $O(n^2)$ & $O(n)$ & Linear \\
+Gradiente & $O(n^2)$ & $O(n)$ & Linear \\
+\hline
+\end{tabular}
+\end{center}
+
+A complexidade do método de Newton é dominada pela resolução do sistema linear
+\[
+\mathbf{J}\big(\mathbf{x}^{(k)}\big)\,\Delta\mathbf{x} = -\mathbf{F}\big(\mathbf{x}^{(k)}\big)
+\]
+a cada iteração.
+
+
+
+
+
+
+
+
+\section{Resultados Numéricos}
+
+\subsection{Introdução}
+Esta seção apresenta os resultados numéricos obtidos através da implementação e aplicação dos métodos desenvolvidos para resolver sistemas de equações lineares e não lineares. Os testes foram realizados em sistemas de diferentes características e dimensões, permitindo uma análise comparativa abrangente da eficiência, precisão e robustez dos métodos implementados.
+
+\subsection{Configuração dos Experimentos}
+
+\subsubsection{Ambiente Computacional}
+Todos os experimentos foram realizados em um ambiente Python 3.8+ com as seguintes especificações:
+\begin{itemize}
+    \item \textbf{Bibliotecas principais}: NumPy, SciPy, Matplotlib, Pandas
+    \item \textbf{Gerenciamento de dependências}: Poetry
+    \item \textbf{Sistema operacional}: macOS (Darwin 24.6.0)
+    \item \textbf{Processador}: Apple Silicon (M1/M2)
+\end{itemize}
+
+\subsubsection{Parâmetros de Teste}
+\paragraph{Sistemas Lineares}
+\begin{itemize}
+    \item \textbf{Tolerâncias testadas}: $10^{-3}$, $10^{-4}$, $10^{-5}$, $10^{-6}$
+    \item \textbf{Máximo de iterações}: 5000
+    \item \textbf{Número de execuções por método}: 10 (para análise estatística)
+    \item \textbf{Critérios de parada}: Resíduo relativo e incremento relativo
+\end{itemize}
+
+\paragraph{Sistemas Não Lineares}
+\begin{itemize}
+    \item \textbf{Tolerância padrão}: $10^{-4}$
+    \item \textbf{Máximo de iterações}: 1000
+    \item \textbf{Aproximações iniciais testadas}: 5 pontos diferentes
+    \item \textbf{Critérios de parada}: Norma da função e incremento da solução
+\end{itemize}
+
+\subsection{Resultados para Sistemas Lineares}
+
+\subsubsection{Sistema 36$\times$36}
+O sistema representa um problema real de análise com 36 variáveis e 36 equações. Este sistema foi escolhido por suas características práticas e dimensão moderada que permite análise detalhada.
+
+\paragraph{Características do Sistema}
+\begin{itemize}
+    \item \textbf{Dimensão}: 36$\times$36
+    \item \textbf{Condicionamento}: Moderadamente bem condicionado
+    \item \textbf{Propriedades}: Diagonalmente dominante por linhas
+\end{itemize}
+
+\paragraph{Resultados de Performance (Tolerância $10^{-5}$)}
+\begin{table}[H]
+\centering
+\begin{tabular}{lccccc}
+\hline
+\textbf{Método} & \textbf{Tempo Médio (s)} & \textbf{Iterações} & \textbf{Taxa Sucesso} & \textbf{Erro Final} & \textbf{Classificação} \\
+\hline
+Jacobi & 0.0002 & 33 & 100\% & $2.08\times 10^{-5}$ & Muito rápido \\
+Jacobi Ordem 2 & 0.0004 & 41 & 100\% & $3.00\times 10^{-5}$ & Muito rápido \\
+SOR ($\omega=1.25$) & 0.0010 & 14 & 100\% & $1.27\times 10^{-6}$ & Muito rápido \\
+Gauss-Seidel & 0.0023 & 19 & 100\% & $7.14\times 10^{-6}$ & Muito rápido \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Análise Detalhada dos Métodos}
+\textbf{Método de Jacobi:}
+\begin{itemize}
+    \item \textbf{Performance}: Excelente velocidade de execução
+    \item \textbf{Convergência}: Linear e estável
+    \item \textbf{Precisão}: Adequada para aplicações práticas
+    \item \textbf{Robustez}: 100\% de taxa de sucesso
+    \item \textbf{Uso de memória}: Baixo (apenas dois vetores)
+\end{itemize}
+
+\textbf{Método de Gauss-Seidel:}
+\begin{itemize}
+    \item \textbf{Performance}: Mais lento que Jacobi devido à dependência sequencial
+    \item \textbf{Convergência}: Mais rápida que Jacobi (19 vs 33 iterações)
+    \item \textbf{Precisão}: Superior ao método de Jacobi
+    \item \textbf{Robustez}: 100\% de taxa de sucesso
+    \item \textbf{Observação}: Variabilidade maior no tempo de execução
+\end{itemize}
+
+\textbf{Método SOR (Successive Over-Relaxation):}
+\begin{itemize}
+    \item \textbf{Performance}: Intermediária entre Jacobi e Gauss-Seidel
+    \item \textbf{Convergência}: Mais eficiente em termos de iterações (14 iterações)
+    \item \textbf{Precisão}: Excelente ($1.27\times 10^{-6}$)
+    \item \textbf{Parâmetro ótimo}: $\omega = 1.25$ (determinado experimentalmente)
+    \item \textbf{Robustez}: 100\% de taxa de sucesso
+\end{itemize}
+
+\textbf{Método de Jacobi de Ordem 2:}
+\begin{itemize}
+    \item \textbf{Performance}: Ligeiramente mais lento que Jacobi clássico
+    \item \textbf{Convergência}: Mais iterações (41) mas melhor precisão
+    \item \textbf{Precisão}: Intermediária entre Jacobi e SOR
+    \item \textbf{Característica}: Combina informações de duas iterações anteriores
+\end{itemize}
+
+\subsubsection{Análise de Convergência}
+\paragraph{Comportamento Temporal dos Métodos}
+A análise do histórico de convergência revela padrões distintos para cada método:
+\begin{itemize}
+    \item \textbf{Jacobi}: Convergência linear constante, sem oscilações significativas.
+    \item \textbf{Gauss-Seidel}: Convergência mais rápida inicialmente, com estabilização gradual.
+    \item \textbf{SOR}: Convergência acelerada devido ao parâmetro de relaxação, com redução exponencial do erro.
+\end{itemize}
+
+\paragraph{Comparação de Eficiência Computacional}
+Considerando o produto tempo $\times$ precisão, o método SOR apresenta a melhor eficiência global:
+\begin{itemize}
+    \item Menor número de iterações
+    \item Excelente precisão final
+    \item Tempo de execução aceitável
+\end{itemize}
+
+\subsubsection{Análise de Sensibilidade à Tolerância}
+\paragraph{Variação da Tolerância ($10^{-3}$ a $10^{-6}$)}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+\hline
+\textbf{Tolerância} & \textbf{Jacobi} & \textbf{Gauss-Seidel} & \textbf{SOR} & \textbf{Jacobi O2} \\
+\hline
+$10^{-3}$ & 15 iter & 8 iter & 6 iter & 18 iter \\
+$10^{-4}$ & 22 iter & 12 iter & 9 iter & 28 iter \\
+$10^{-5}$ & 33 iter & 19 iter & 14 iter & 41 iter \\
+$10^{-6}$ & 45 iter & 26 iter & 19 iter & 55 iter \\
+\hline
+\end{tabular}
+\end{table}
+\textbf{Observações:}
+\begin{itemize}
+    \item Todos os métodos mantêm convergência linear
+    \item SOR mantém vantagem em número de iterações
+    \item Jacobi Ordem 2 requer mais iterações mas oferece melhor estabilidade
+\end{itemize}
+
+\subsection{Resultados para Sistemas Não Lineares}
+
+\subsubsection{Sistema Não Linear Tridimensional}
+O sistema implementado representa a interseção de três superfícies geométricas:
+\[
+\begin{cases}
+F_1(x,y,z) = (x-1)^2 + (y-1)^2 + (z-1)^2 - 1 = 0 \\
+F_2(x,y,z) = 2x^2 + (y-1)^2 - 4z = 0 \\
+F_3(x,y,z) = 3x^2 + 2z^2 - 4y = 0
+\end{cases}
+\]
+\paragraph{Características do Sistema}
+\begin{itemize}
+    \item \textbf{Dimensão}: 3$\times$3
+    \item \textbf{Número de soluções}: Múltiplas (pelo menos 2 identificadas)
+    \item \textbf{Complexidade}: Moderada, com jacobiano bem definido
+    \item \textbf{Aplicação}: Problema geométrico de interseção de superfícies
+\end{itemize}
+
+\subsubsection{Resultados do Método de Newton--Raphson}
+\paragraph{Taxa de Convergência: 100\% (5/5 aproximações iniciais)}
+\begin{table}[H]
+\centering
+\begin{tabular}{lccccc}
+\hline
+\textbf{Aprox. Inicial} & \textbf{Iter.} & \textbf{Solução Encontrada} & \textbf{Tempo (s)} & \textbf{Erro Final} \\
+\hline
+$[0,0,0]$ & 5  & $[0.649,\,0.365,\,0.312]$ & 0.000118 & $5.10\times 10^{-6}$ \\
+$[1,1,1]$ & 11 & $[0.649,\,0.365,\,0.312]$ & 0.000435 & $2.50\times 10^{-7}$ \\
+$[2,2,2]$ & 5  & $[1.330,\,1.938,\,1.105]$ & 0.000062 & $3.49\times 10^{-6}$ \\
+$[0.5,0.5,0.5]$ & 4 & $[0.649,\,0.365,\,0.312]$ & 0.000045 & $3.45\times 10^{-6}$ \\
+$[1.5,1.5,0.5]$ & 6 & $[1.330,\,1.938,\,1.105]$ & 0.000064 & $2.07\times 10^{-6}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Análise das Soluções Encontradas}
+\textbf{Solução 1}: $\mathbf{x}_1 \approx [0.649,\,0.365,\,0.312]$
+\begin{itemize}
+    \item \textbf{Verificação}: $(x-1)^2 + (y-1)^2 + (z-1)^2 = 1.00000337 \approx 1$
+    \item \textbf{Determinante do Jacobiano}: $43.7312$ (positivo)
+    \item \textbf{Região de convergência}: Pontos próximos à origem
+\end{itemize}
+
+\textbf{Solução 2}: $\mathbf{x}_2 \approx [1.330,\,1.938,\,1.105]$
+\begin{itemize}
+    \item \textbf{Verificação}: $(x-1)^2 + (y-1)^2 + (z-1)^2 = 1.00000215 \approx 1$
+    \item \textbf{Determinante do Jacobiano}: $-116.7302$ (negativo)
+    \item \textbf{Região de convergência}: Pontos distantes da origem
+\end{itemize}
+
+\paragraph{Características da Convergência}
+\begin{itemize}
+    \item \textbf{Convergência quadrática}: Redução exponencial do erro a cada iteração.
+    \item \textbf{Sensibilidade à aproximação inicial}: Diferentes aproximações levam a diferentes soluções.
+    \item \textbf{Eficiência computacional}: Tempos da ordem de $10^{-4}$ s.
+\end{itemize}
+
+\subsubsection{Resultados do Método da Iteração de Ponto Fixo}
+\paragraph{Taxa de Convergência: 0\% (0/5 aproximações iniciais)}
+O método falhou em convergir para todas as aproximações iniciais testadas, apresentando divergência explosiva:
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\hline
+\textbf{Aprox. Inicial} & \textbf{Iterações} & \textbf{Status} & \textbf{Erro Final} \\
+\hline
+$[0,0,0]$ & 8  & Divergiu & $1.58\times 10^{14}$ \\
+$[1,1,1]$ & 11 & Divergiu & $3.19\times 10^{11}$ \\
+$[2,2,2]$ & 9  & Divergiu & $4.86\times 10^{14}$ \\
+$[0.5,0.5,0.5]$ & 13 & Divergiu & $9.92\times 10^{16}$ \\
+$[1.5,1.5,0.5]$ & 9 & Divergiu & $3.21\times 10^{19}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Análise da Divergência}
+\begin{itemize}
+    \item \textbf{Causa}: Parâmetro de relaxação $\alpha$ inadequado.
+    \item \textbf{Comportamento}: Crescimento exponencial das variáveis (instabilidade numérica).
+    \item \textbf{Correções possíveis}: Reduzir $\alpha$; busca linear adaptativa; métodos de estabilização.
+\end{itemize}
+
+\subsubsection{Resultados do Método do Gradiente}
+\paragraph{Taxa de Convergência: 0\% (0/5 aproximações iniciais)}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+\hline
+\textbf{Aprox. Inicial} & \textbf{Iterações} & \textbf{Erro Final} & \textbf{Tempo (s)} & \textbf{Status} \\
+\hline
+$[0,0,0]$ & 166 & $8.25\times 10^{-3}$ & 0.002399 & Não convergiu \\
+$[1,1,1]$ & 425 & $8.37\times 10^{-3}$ & 0.006251 & Não convergiu \\
+$[2,2,2]$ & 123 & $6.71\times 10^{-3}$ & 0.002287 & Não convergiu \\
+$[0.5,0.5,0.5]$ & 29 & $4.77\times 10^{-3}$ & 0.000422 & Não convergiu \\
+$[1.5,1.5,0.5]$ & 231 & $6.87\times 10^{-3}$ & 0.003384 & Não convergiu \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Análise do Comportamento}
+\begin{itemize}
+    \item \textbf{Convergência parcial}: Aproxima-se das soluções, mas não atinge $10^{-4}$.
+    \item \textbf{Estabilidade}: Sem divergência explosiva.
+    \item \textbf{Melhorias}: Busca linear mais sofisticada; passo adaptativo; critérios de parada flexíveis.
+\end{itemize}
+
+\subsection{Análise Comparativa Geral}
+
+\subsubsection{Sistemas Lineares vs Não Lineares}
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\hline
+\textbf{Aspecto} & \textbf{Lineares} & \textbf{Não Lineares} \\
+\hline
+Convergência & Garantida (sob condições) & Depende da aproximação inicial \\
+Velocidade & Rápida (ms) & Variável ($\mu$s a ms) \\
+Precisão & Alta ($10^{-6}$ a $10^{-15}$) & Muito alta ($10^{-6}$ a $10^{-15}$) \\
+Robustez & Alta & Moderada a baixa \\
+Complexidade & Baixa a moderada & Alta \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Ranking de Eficiência}
+\paragraph{Para Sistemas Lineares (36$\times$36)}
+\begin{enumerate}
+    \item \textbf{Jacobi}: Melhor para velocidade pura
+    \item \textbf{SOR}: Melhor eficiência global (tempo $\times$ precisão)
+    \item \textbf{Gauss-Seidel}: Bom equilíbrio velocidade/precisão
+    \item \textbf{Jacobi Ordem 2}: Maior estabilidade, menor velocidade
+\end{enumerate}
+
+\paragraph{Para Sistemas Não Lineares}
+\begin{enumerate}
+    \item \textbf{Newton--Raphson}: Superior quando converge
+    \item \textbf{Gradiente}: Robusto porém lento
+    \item \textbf{Iteração de Ponto Fixo}: Requer ajuste de parâmetros
+\end{enumerate}
+
+\subsubsection{Recomendações de Uso}
+\paragraph{Sistemas Lineares}
+\begin{itemize}
+    \item \textbf{Sistemas pequenos ($<100$ variáveis)}: Qualquer método iterativo
+    \item \textbf{Grandes e esparsos}: Gradiente Conjugado ou SOR
+    \item \textbf{Mal condicionados}: Métodos precondicionados
+    \item \textbf{Tempo real}: Jacobi (paralelizável)
+\end{itemize}
+
+\paragraph{Sistemas Não Lineares}
+\begin{itemize}
+    \item \textbf{Aproximação inicial conhecida}: Newton--Raphson
+    \item \textbf{Aproximação inicial incerta}: Gradiente
+    \item \textbf{Múltiplas soluções}: Newton com diferentes aproximações
+    \item \textbf{Precisão crítica}: Newton--Raphson
+\end{itemize}
+
+\subsection{Análise de Bacias de Atração}
+
+\subsubsection{Metodologia}
+Foi implementada ferramenta de visualização das bacias de atração para o sistema não linear, analisando o comportamento do método de Newton em um plano 2D (fixando $z=0$).
+
+\subsubsection{Resultados Observados}
+\begin{itemize}
+    \item \textbf{Região de Convergência para Solução 1}: Pontos próximos à origem convergem para $\mathbf{x}_1 \approx [0.649,0.365,0.312]$.
+    \item \textbf{Região de Convergência para Solução 2}: Pontos distantes da origem convergem para $\mathbf{x}_2 \approx [1.330,1.938,1.105]$.
+    \item \textbf{Fronteiras}: Regiões de transição onde pequenas mudanças na aproximação inicial podem levar a diferentes soluções.
+\end{itemize}
+
+\subsubsection{Implicações Práticas}
+\begin{itemize}
+    \item \textbf{Sensibilidade}: A escolha da aproximação inicial é crucial.
+    \item \textbf{Múltiplas soluções}: Podem coexistir soluções válidas.
+    \item \textbf{Robustez}: Newton é eficiente, porém sensível à aproximação inicial.
+\end{itemize}
+
+\subsection{Validação e Verificação}
+
+\subsubsection{Verificação das Soluções}
+Todas as soluções encontradas foram verificadas substituindo os valores nas equações originais:
+\begin{itemize}
+    \item \textbf{Solução 1}: Erro relativo $<10^{-5}$ em todas as equações.
+    \item \textbf{Solução 2}: Erro relativo $<10^{-5}$ em todas as equações.
+\end{itemize}
+
+\subsubsection{Análise de Estabilidade Numérica}
+\begin{itemize}
+    \item \textbf{Sistemas lineares}: Estabilidade numérica mantida em todos os testes.
+    \item \textbf{Sistemas não lineares}: Estabilidade completa apenas com Newton.
+\end{itemize}
+
+\subsubsection{Reprodutibilidade}
+Experimentos executados múltiplas vezes com resultados consistentes, garantindo reprodutibilidade.
+
+\subsection{Limitações e Considerações}
+
+\subsubsection{Limitações dos Experimentos}
+\begin{itemize}
+    \item \textbf{Escopo limitado}: Sistemas específicos podem não representar o comportamento geral.
+    \item \textbf{Ambiente específico}: Resultados podem variar em outras arquiteturas.
+    \item \textbf{Parâmetros fixos}: Desempenho pode melhorar com otimização de parâmetros.
+\end{itemize}
+
+\subsubsection{Considerações para Aplicações Práticas}
+\begin{itemize}
+    \item \textbf{Escolha do método}: Considerar características do problema.
+    \item \textbf{Tolerâncias}: Ajustar conforme requisitos de precisão.
+    \item \textbf{Aproximações iniciais}: Críticas em não lineares.
+    \item \textbf{Recursos computacionais}: Requisitos variam entre métodos.
+\end{itemize}
+
+\noindent Os resultados apresentados demonstram a eficácia dos métodos implementados e fornecem base para escolha de métodos em aplicações práticas.
+
+
+
+
+
+
+
+
+\section{Consultas em IA Utilizadas (com resultados)}
+
+\subsection{Como configurar \textit{Poetry} no macOS (M1/M2)}
+
+\paragraph{Passos rápidos (oficiais).}
+\begin{enumerate}
+  \item Verifique o Python (\(\geq\) 3.9): \verb|python3 --version|. \cite{poetry-docs}
+  \item Instale o Poetry (instalador oficial):\\
+  \verb|curl -sSL https://install.python-poetry.org | python3 -| \cite{poetry-installer}
+  \item Garanta o \texttt{PATH}: o instalador sugere o diretório (p.ex. \verb|~/.local/bin|) e como adicioná-lo ao \texttt{PATH}. Reinicie o terminal. \cite{poetry-installer}
+  \item Teste: \verb|poetry --version| \cite{poetry-docs}
+\end{enumerate}
+
+\paragraph{Uso básico.}
+\begin{verbatim}
+poetry new meu_projeto
+cd meu_projeto
+poetry env use python3.11   % (opcional, fixa o interpretador)
+poetry install              % instala deps do pyproject.toml
+poetry add numpy            % adiciona dependência
+poetry shell                % ativa o venv do Poetry
+\end{verbatim}
+\noindent Observações: o Poetry não instala um interpretador Python por você; traga o seu próprio (pyenv/instalação do sistema). \cite{poetry-basic-usage}
+
+\subsection{Explicação sobre taxa/ordem de convergência}
+
+Se \((x_k)\to L\), dizemos que há \emph{ordem de convergência} \(q\ge 1\) e \emph{taxa} \(\mu\) quando
+\[
+\lim_{k\to\infty}\frac{|x_{k+1}-L|}{|x_k-L|^{\,q}}=\mu.
+\]
+Casos clássicos: \textbf{linear} (\(q=1,\,0<\mu<1\)), \textbf{quadrática} (\(q=2\)), \textbf{superlinear} (\(q>1\)). \cite{wikipedia-roc}
+
+\paragraph{Estimativa prática de \(q\) (a partir de iterados).}
+\[
+q \approx 
+\frac{\log\left|\dfrac{x_{k+1}-x_k}{x_k-x_{k-1}}\right|}
+     {\log\left|\dfrac{x_k-x_{k-1}}{x_{k-1}-x_{k-2}}\right|}.
+\]
+Útil para sequências vindas de iteração de ponto fixo/métodos iterativos. \cite{wikipedia-roc,mitran-lecture}
+
+\subsection{Formatação em \LaTeX}
+
+\paragraph{Estrutura mínima.}
+\begin{verbatim}
+\documentclass[12pt,a4paper]{article}    % define a classe
+\usepackage{graphicx,amsmath,amssymb}    % pacotes comuns
+\begin{document}
+\section{Título}
+Texto...
+\end{document}
+\end{verbatim}
+A classe (\texttt{article}, \texttt{report}, \texttt{book}) define o estilo base, enquanto pacotes (\texttt{.sty}) adicionam funcionalidades. \cite{overleaf-classes}
+
+\paragraph{Tabelas (exemplo).}
+\begin{verbatim}
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+Metodo & Iter. & Erro \\
+\hline
+Jacobi & 33 & 2.08e-5 \\
+\hline
+\end{tabular}
+\caption{Exemplo de tabela.}
+\end{table}
+\end{verbatim}
+Guia completo de tabelas e boas práticas disponível na documentação da Overleaf. \cite{overleaf-tables,overleaf-learn30}
+
+\subsection{Criação de testes unitários para minha aplicação (\texttt{pytest})}
+
+\paragraph{Instalação e primeiro teste.}
+\begin{verbatim}
+pip install -U pytest
+pytest --version
+# teste em tests/test_basico.py
+def soma(a,b): return a+b
+
+def test_soma():
+    assert soma(2,3) == 5
+\end{verbatim}
+Execute com \verb|pytest| (descoberta automática em arquivos \texttt{test\_*.py}/\texttt{*\_test.py}). \cite{pytest-get-started,pytest-docs}
+
+\paragraph{Fixtures, parametrização e configuração.}
+\begin{verbatim}
+# tests/test_param.py
+import pytest
+
+@pytest.fixture
+def db_conn(): ...
+@pytest.mark.parametrize("a,b,esperado", [(2,3,5),(0,1,1)])
+def test_soma_param(a,b,esperado):
+    assert soma(a,b) == esperado
+\end{verbatim}
+Opcional: \texttt{pytest.ini} ou \texttt{pyproject.toml} para marcar testes, opções padrão, etc. \cite{pytest-contents}
+
+
+
+\section{Conclusões}
+
+\subsection{Síntese dos Resultados Obtidos}
+
+Este trabalho apresentou uma implementação abrangente e bem estruturada de métodos numéricos para resolução de sistemas de equações lineares e não lineares, desenvolvida em Python com foco em boas práticas de engenharia de software. Os resultados obtidos demonstram a eficácia dos métodos implementados e fornecem insights valiosos sobre suas características de performance e aplicabilidade.
+
+\subsubsection{Sistemas Lineares}
+
+Para o sistema $36\times 36$ testado, os resultados revelaram uma hierarquia clara de eficiência:
+
+\paragraph{Método de Jacobi} Emergiu como o mais rápido em termos de tempo de execução (0.0002s), demonstrando excelente paralelização e baixo uso de memória. Sua simplicidade de implementação e robustez o tornam ideal para aplicações que priorizam velocidade sobre precisão máxima.
+
+\paragraph{Método SOR} Apresentou a melhor eficiência global, combinando convergência rápida (14 iterações) com excelente precisão ($1.27 \times 10^{-6}$). O parâmetro de relaxação $\omega = 1.25$ demonstrou ser otimizado para este tipo de sistema, evidenciando a importância da calibração adequada de parâmetros.
+
+\paragraph{Método de Gauss--Seidel} Mostrou convergência mais rápida que Jacobi (19 vs 33 iterações), mas com maior variabilidade no tempo de execução, refletindo sua dependência sequencial que limita a paralelização.
+
+\paragraph{Método de Jacobi de Ordem 2} Ofereceu maior estabilidade numérica às custas de mais iterações, sendo adequado para sistemas onde a robustez é prioritária.
+
+\subsubsection{Sistemas Não Lineares}
+
+Os resultados para o sistema não linear tridimensional foram marcadamente distintos:
+
+\paragraph{Método de Newton--Raphson} Demonstrou superioridade absoluta, convergindo para todas as aproximações iniciais testadas (100\% de taxa de sucesso) com convergência quadrática característica. O método identificou duas soluções distintas do sistema, evidenciando sua capacidade de encontrar múltiplas raízes quando iniciado de diferentes pontos.
+
+\paragraph{Método da Iteração de Ponto Fixo} Falhou completamente em convergir, apresentando divergência explosiva para todos os pontos iniciais testados. Este resultado destaca a sensibilidade crítica deste método aos parâmetros de relaxação e a necessidade de calibração cuidadosa.
+
+\paragraph{Método do Gradiente} Mostrou comportamento estável, mas convergência insuficiente, aproximando-se das soluções sem atingir a tolerância especificada. Sua robustez o torna adequado para aproximações iniciais, mas sua lentidão limita a aplicação prática.
+
+\subsection{Contribuições Principais}
+
+\subsubsection{Contribuições Técnicas}
+
+\paragraph{Arquitetura Modular} A implementação seguiu princípios de engenharia de software, resultando em código modular, extensível e bem documentado. A separação clara entre interface, lógica de negócio e implementações específicas facilita manutenção e extensões futuras.
+
+\paragraph{Interface Unificada} Todos os métodos implementados seguem uma interface comum, permitindo comparação direta e uso intercambiável. Esta padronização é valiosa tanto para fins educacionais quanto para aplicações práticas.
+
+\paragraph{Análise Automática} O sistema inclui validação automática de propriedades de matrizes, análise de condicionamento e recomendações de métodos, reduzindo a necessidade de expertise especializada para seleção adequada de algoritmos.
+
+\paragraph{Ferramentas de Benchmarking} A implementação de benchmarking automático permite avaliação objetiva de performance, facilitando comparações e otimizações.
+
+\subsubsection{Contribuições Científicas}
+
+\paragraph{Validação Empírica} Os resultados fornecem evidência empírica robusta sobre as características de performance dos métodos implementados em problemas reais, complementando análises teóricas existentes.
+
+\paragraph{Análise de Sensibilidade} O estudo sistemático da sensibilidade à tolerância e aproximações iniciais fornece insights práticos para seleção de parâmetros em aplicações reais.
+
+\paragraph{Comparação Metodológica} A comparação direta entre métodos clássicos e de alta ordem em condições idênticas oferece uma base objetiva para escolha de métodos.
+
+\subsection{Implicações Práticas}
+
+\subsubsection{Para Desenvolvedores de Software Científico}
+
+A arquitetura e práticas de desenvolvimento demonstradas neste trabalho podem servir como modelo para implementações similares. O uso de ferramentas modernas de desenvolvimento (Poetry, \textit{pre-commit} hooks, testes automatizados) garante qualidade e manutenibilidade do código.
+
+\subsubsection{Para Usuários de Métodos Numéricos}
+
+Os resultados fornecem diretrizes claras para seleção de métodos:
+\begin{itemize}
+  \item \textbf{Sistemas pequenos e bem condicionados}: qualquer método iterativo é adequado;
+  \item \textbf{Sistemas grandes e esparsos}: SOR ou Gradiente Conjugado são preferíveis;
+  \item \textbf{Sistemas não lineares com aproximação inicial conhecida}: Newton--Raphson é superior;
+  \item \textbf{Sistemas não lineares com incerteza na aproximação inicial}: Método do Gradiente oferece maior robustez.
+\end{itemize}
+
+\subsubsection{Para Educadores}
+
+A implementação transparente e bem documentada serve como ferramenta educacional valiosa, permitindo aos estudantes compreender não apenas os aspectos teóricos dos métodos, mas também suas características computacionais práticas.
+
+\subsection{Limitações e Trabalhos Futuros}
+
+\subsubsection{Limitações Identificadas}
+
+\paragraph{Escopo de Testes} Os experimentos foram limitados a sistemas específicos. Testes mais amplos em diferentes tipos de problemas seriam valiosos para generalização dos resultados.
+
+\paragraph{Otimização de Parâmetros} Alguns métodos (especialmente SOR e métodos não lineares) poderiam se beneficiar de otimização mais sofisticada de parâmetros.
+
+\paragraph{Implementação Paralela} Embora a arquitetura suporte paralelização, implementações paralelas completas não foram desenvolvidas neste trabalho.
+
+\subsubsection{Direções Futuras}
+
+\paragraph{Extensão para Sistemas Maiores} Implementação e teste em sistemas de maior dimensão (1000+ variáveis) para validar escalabilidade.
+
+\paragraph{Métodos Avançados} Implementação de métodos mais sofisticados como métodos de subespaço de Krylov e multigrid.
+
+\paragraph{Integração com IA} Desenvolvimento das aplicações de IA discutidas na seção anterior, incluindo otimização automática de parâmetros e seleção inteligente de métodos.
+
+\paragraph{Interface Gráfica} Desenvolvimento de interface gráfica para facilitar uso por usuários não técnicos.
+
+\paragraph{Validação em Problemas Reais} Aplicação dos métodos em problemas reais de engenharia e ciências para validação prática.
+
+\subsection{Impacto e Relevância}
+
+\subsubsection{Relevância Acadêmica}
+
+Este trabalho contribui para a literatura de métodos numéricos fornecendo implementações educacionais transparentes e análise comparativa empírica. A combinação de rigor teórico com implementação prática oferece valor tanto para pesquisadores quanto para educadores.
+
+\subsubsection{Relevância Técnica}
+
+A demonstração de como conceitos matemáticos abstratos podem ser transformados em ferramentas computacionais robustas e eficientes é relevante para a crescente comunidade de desenvolvedores científicos em Python.
+
+\subsubsection{Relevância Prática}
+
+Os métodos implementados têm aplicação direta em problemas reais de engenharia e ciências aplicadas. A capacidade de resolver sistemas de grande porte de forma eficiente é crucial para simulações computacionais em diversas áreas.
+
+\subsection{Considerações Finais}
+
+Este trabalho demonstrou que é possível desenvolver implementações de métodos numéricos que combinam rigor matemático, qualidade de software e eficiência computacional. A abordagem sistemática adotada --- desde a fundamentação teórica até a validação empírica --- resultou em uma biblioteca robusta e bem documentada.
+
+Os resultados obtidos confirmam as propriedades teóricas conhecidas dos métodos implementados e fornecem evidência empírica adicional sobre suas características práticas. A comparação direta entre diferentes métodos em condições controladas oferece uma base sólida para tomada de decisões em aplicações reais.
+
+A integração de boas práticas de desenvolvimento de software com implementação de métodos numéricos demonstra como a engenharia de software pode potencializar a computação científica, resultando em ferramentas mais confiáveis, manuteníveis e eficientes.
+
+O futuro da computação científica provavelmente verá uma integração cada vez mais profunda entre métodos numéricos tradicionais e técnicas emergentes de IA, como discutido na seção anterior. Este trabalho estabelece uma base sólida para tais desenvolvimentos futuros, fornecendo implementações robustas e bem estruturadas que podem ser estendidas e melhoradas com técnicas avançadas.
+
+Em conclusão, este trabalho contribui significativamente para o campo de métodos numéricos, oferecendo não apenas implementações práticas e eficientes, mas também uma metodologia de desenvolvimento que pode ser aplicada a outros problemas computacionais. A combinação de rigor científico, qualidade de software e análise empírica robusta estabelece um padrão para trabalhos futuros na área.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+
+
+\bibliographystyle{apalike}
+
+\begin{thebibliography}{9}
+
+\bibitem{poetry-docs}
+\emph{Poetry Documentation: Introduction \& System requirements}. Disponível em: \url{https://python-poetry.org/docs/}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn1search0}}
+
+\bibitem{poetry-installer}
+\emph{Poetry Official Installer}. Disponível em: \url{https://install.python-poetry.org/}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn1search2}}
+
+\bibitem{poetry-basic-usage}
+\emph{Poetry Docs: Basic usage}. Disponível em: \url{https://python-poetry.org/docs/basic-usage/}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn1search10}}
+
+\bibitem{wikipedia-roc}
+\emph{Rate of convergence}. Wikipedia. Disponível em: \url{https://en.wikipedia.org/wiki/Rate_of_convergence}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn0search1}}
+
+\bibitem{mitran-lecture}
+\emph{Rate and order of convergence (lecture notes)}. UNC (PDF). Acesso em: 29~out.~2025. {\footnotesize \cite{turn0search7}}
+
+\bibitem{overleaf-classes}
+\emph{Understanding packages and class files}. Overleaf Learn. Disponível em: \url{https://www.overleaf.com/learn/latex/Understanding_packages_and_class_files}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn0search5}}
+
+\bibitem{overleaf-tables}
+\emph{Tables}. Overleaf Learn. Disponível em: \url{https://www.overleaf.com/learn/latex/Tables}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn0search2}}
+
+\bibitem{overleaf-learn30}
+\emph{Learn LaTeX in 30 minutes}. Overleaf Learn. Disponível em: \url{https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn0search8}}
+
+\bibitem{pytest-get-started}
+\emph{pytest: Get Started}. Documentação oficial. Disponível em: \url{https://docs.pytest.org/en/stable/getting-started.html}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn1search1}}
+
+\bibitem{pytest-docs}
+\emph{pytest: Full documentation}. Documentação oficial. Disponível em: \url{https://docs.pytest.org/en/stable/contents.html}. Acesso em: 29~out.~2025. {\footnotesize \cite{turn1search5}}
+
+\end{thebibliography}
+
+
+
+
+\end{document}

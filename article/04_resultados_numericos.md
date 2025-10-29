@@ -313,3 +313,4 @@ Todos os experimentos foram executados múltiplas vezes com resultados consisten
 - **Recursos computacionais**: Métodos diferentes têm diferentes requisitos de memória e processamento
 
 Os resultados apresentados demonstram a eficácia dos métodos implementados e fornecem uma base sólida para escolha de métodos em aplicações práticas.
+

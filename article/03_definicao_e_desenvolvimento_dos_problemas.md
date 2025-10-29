@@ -358,3 +358,4 @@ A implementação utiliza ambos os critérios, parando quando qualquer um deles 
 | Gradiente | $O(n^2)$ | $O(n)$ | Linear |
 
 A complexidade do método de Newton é dominada pela resolução do sistema linear $\mathbf{J}(\mathbf{x}^{(k)}) \Delta\mathbf{x} = -\mathbf{F}(\mathbf{x}^{(k)})$ a cada iteração.
+
