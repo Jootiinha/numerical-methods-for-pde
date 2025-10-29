@@ -1,0 +1,233 @@
+RESULTADOS DA RESOLUÇÃO DO SISTEMA NÃO LINEAR
+======================================================================
+
+Sistema de equações:
+  F₁: (x-1)² + (y-1)² + (z-1)² - 1 = 0
+  F₂: 2x² + (y-1)² - 4z = 0
+  F₃: 3x² + 2z² - 4y = 0
+
+Tolerância: 0.0001
+
+MÉTODO: NEWTON
+--------------------------------------------------
+
+Taxa de convergência: 5/5 aproximações iniciais
+
+Aproximação inicial #1: [0. 0. 0.]
+  Status: CONVERGIU
+  Iterações: 5
+  Solução: [0.64942181, 0.36489375, 0.31171347]
+  Critérios de parada:
+    ||F(x)||: 5.10e-06
+    max|Fᵢ(x)|: 3.46e-06
+  Regularidade da raiz:
+    det(J(x*)): 43.7312
+  Tempo: 0.000118s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00000337 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.24685734, 4z = 1.24685388
+    Eq3: 3x²+2z² = 1.45957665, 4y = 1.45957499
+
+Aproximação inicial #2: [1. 1. 1.]
+  Status: CONVERGIU
+  Iterações: 11
+  Solução: [0.64942245, 0.36489501, 0.31171431]
+  Critérios de parada:
+    ||F(x)||: 2.50e-07
+    max|Fᵢ(x)|: 1.48e-07
+  Regularidade da raiz:
+    det(J(x*)): 43.7312
+  Tempo: 0.000435s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00000015 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.24685739, 4z = 1.24685725
+    Eq3: 3x²+2z² = 1.45958020, 4y = 1.45958005
+
+Aproximação inicial #3: [2. 2. 2.]
+  Status: CONVERGIU
+  Iterações: 5
+  Solução: [1.33041994, 1.93798091, 1.10496016]
+  Critérios de parada:
+    ||F(x)||: 3.49e-06
+    max|Fᵢ(x)|: 2.15e-06
+  Regularidade da raiz:
+    det(J(x*)): -116.7302
+  Tempo: 0.000062s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00000215 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 4.41984261, 4z = 4.41984063
+    Eq3: 3x²+2z² = 7.75192554, 4y = 7.75192362
+
+Aproximação inicial #4: [0.5 0.5 0.5]
+  Status: CONVERGIU
+  Iterações: 4
+  Solução: [0.64942213, 0.36489408, 0.31171401]
+  Critérios de parada:
+    ||F(x)||: 3.45e-06
+    max|Fᵢ(x)|: 2.25e-06
+  Regularidade da raiz:
+    det(J(x*)): 43.7312
+  Tempo: 0.000045s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00000198 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.24685775, 4z = 1.24685603
+    Eq3: 3x²+2z² = 1.45957857, 4y = 1.45957632
+
+Aproximação inicial #5: [1.5 1.5 0.5]
+  Status: CONVERGIU
+  Iterações: 6
+  Solução: [1.33041976, 1.93798055, 1.10495994]
+  Critérios de parada:
+    ||F(x)||: 2.07e-06
+    max|Fᵢ(x)|: 1.31e-06
+  Regularidade da raiz:
+    det(J(x*)): -116.7301
+  Tempo: 0.000064s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00000131 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 4.41984100, 4z = 4.41983977
+    Eq3: 3x²+2z² = 7.75192319, 4y = 7.75192218
+
+
+MÉTODO: ITERACAO
+--------------------------------------------------
+
+Taxa de convergência: 0/5 aproximações iniciais
+
+Aproximação inicial #1: [0. 0. 0.]
+  Status: NÃO CONVERGIU
+  Iterações: 8
+  Solução: [-3612757.35013612, -2061045.57395250, -7091279.91659623]
+  Critérios de parada:
+    ||F(x)||: 1.58e+14
+    max|Fᵢ(x)|: 1.40e+14
+  Tempo: 0.000760s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 67586200914561.42187500 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 30351944321926.40625000, 4z = -28365119.66638492
+    Eq3: 3x²+2z² = 139728548723929.65625000, 4y = -8244182.29580999
+
+Aproximação inicial #2: [1. 1. 1.]
+  Status: NÃO CONVERGIU
+  Iterações: 11
+  Solução: [-165189.88194798, -97035.91250454, -315456.16535827]
+  Critérios de parada:
+    ||F(x)||: 3.19e+11
+    max|Fᵢ(x)|: 2.81e+11
+  Tempo: 0.001429s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 136217413043.04129028 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 63991556584.38664246, 4z = -1261824.66143309
+    Eq3: 3x²+2z² = 280888275819.05236816, 4y = -388143.65001816
+
+Aproximação inicial #3: [2. 2. 2.]
+  Status: NÃO CONVERGIU
+  Iterações: 9
+  Solução: [-6342262.11444986, -3472890.76754382, -12425895.94886910]
+  Critérios de parada:
+    ||F(x)||: 4.86e+14
+    max|Fᵢ(x)|: 4.29e+14
+  Tempo: 0.000962s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 206688193625899.12500000 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 92509554685845.51562500, 4z = -49703583.79547639
+    Eq3: 3x²+2z² = 429478646449400.81250000, 4y = -13891563.07017527
+
+Aproximação inicial #4: [0.5 0.5 0.5]
+  Status: NÃO CONVERGIU
+  Iterações: 13
+  Solução: [-87091571.95278527, -45194115.22487835, -180715670.13801619]
+  Critérios de parada:
+    ||F(x)||: 9.92e+16
+    max|Fᵢ(x)|: 8.81e+16
+  Tempo: 0.001882s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 42285604015601752.00000000 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 17212391951762160.00000000, 4z = -722862680.55206478
+    Eq3: 3x²+2z² = 88071132582486080.00000000, 4y = -180776460.89951339
+
+Aproximação inicial #5: [1.5 1.5 0.5]
+  Status: NÃO CONVERGIU
+  Iterações: 9
+  Solução: [-1587007658.83974147, -768303433.97275472, -3236348964.05902386]
+  Critérios de parada:
+    ||F(x)||: 3.21e+19
+    max|Fᵢ(x)|: 2.85e+19
+  Tempo: 0.000956s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 13582838104219559936.00000000 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 5627476786622928896.00000000, 4z = -12945395856.23609543
+    Eq3: 3x²+2z² = 28503689161979822080.00000000, 4y = -3073213735.89101887
+
+
+MÉTODO: GRADIENTE
+--------------------------------------------------
+
+Taxa de convergência: 0/5 aproximações iniciais
+
+Aproximação inicial #1: [0. 0. 0.]
+  Status: NÃO CONVERGIU
+  Iterações: 166
+  Solução: [0.64592043, 0.36118281, 0.31118127]
+  Critérios de parada:
+    ||F(x)||: 8.25e-03
+    max|Fᵢ(x)|: 7.93e-03
+  Tempo: 0.002399s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00793099 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.24251382, 4z = 1.24472507
+    Eq3: 3x²+2z² = 1.44530719, 4y = 1.44473124
+
+Aproximação inicial #2: [1. 1. 1.]
+  Status: NÃO CONVERGIU
+  Iterações: 425
+  Solução: [0.65297484, 0.36868657, 0.31227190]
+  Critérios de parada:
+    ||F(x)||: 8.37e-03
+    max|Fᵢ(x)|: 8.05e-03
+  Tempo: 0.006251s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 0.99195305 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.25130893, 4z = 1.24908758
+    Eq3: 3x²+2z² = 1.47415591, 4y = 1.47474629
+
+Aproximação inicial #3: [2. 2. 2.]
+  Status: NÃO CONVERGIU
+  Iterações: 123
+  Solução: [1.33079286, 1.94112097, 1.10718720]
+  Critérios de parada:
+    ||F(x)||: 6.71e-03
+    max|Fᵢ(x)|: 6.62e-03
+  Tempo: 0.002287s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 1.00662170 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 4.42772796, 4z = 4.42874878
+    Eq3: 3x²+2z² = 7.76475588, 4y = 7.76448390
+
+Aproximação inicial #4: [0.5 0.5 0.5]
+  Status: NÃO CONVERGIU
+  Iterações: 29
+  Solução: [0.65136145, 0.36684143, 0.31237334]
+  Critérios de parada:
+    ||F(x)||: 4.77e-03
+    max|Fᵢ(x)|: 4.73e-03
+  Tempo: 0.000422s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 0.99526903 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 1.24943325, 4z = 1.24949336
+    Eq3: 3x²+2z² = 1.46796943, 4y = 1.46736573
+
+Aproximação inicial #5: [1.5 1.5 0.5]
+  Status: NÃO CONVERGIU
+  Iterações: 231
+  Solução: [1.33003161, 1.93474810, 1.10266946]
+  Critérios de parada:
+    ||F(x)||: 6.87e-03
+    max|Fᵢ(x)|: 6.78e-03
+  Tempo: 0.003384s
+  Verificação:
+    Eq1: (x-1)²+(y-1)²+(z-1)² = 0.99321589 (deve ser ≈ 1)
+    Eq2: 2x²+(y-1)² = 4.41172216, 4z = 4.41067783
+    Eq3: 3x²+2z² = 7.73871209, 4y = 7.73899240
+
+

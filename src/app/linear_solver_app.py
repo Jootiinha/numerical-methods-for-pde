@@ -53,8 +53,10 @@ def build_methods_list(args, analysis):
     return solvers
 
 
-def solve_with_selected_methods(A, b, matrix_name, args):
+def solve_with_selected_methods(A, b, matrix_name, args, config):
     """Resolve o sistema com os métodos selecionados."""
+    
+    decimal_places = config.get('decimal_places', 4)
     
     print(f"\n🔧 RESOLVENDO SISTEMA: {matrix_name}")
     print("-" * 50)
@@ -84,11 +86,11 @@ def solve_with_selected_methods(A, b, matrix_name, args):
             
             if info['converged']:
                 print(f"   ✅ Convergiu em {info['iterations']} iterações")
-                print(f"   📊 Erro final: {info['final_error']:.2e}")
+                print(f"   📊 Erro final: {info['final_error']:.{decimal_places}f}")
                 
                 # Verificar qualidade da solução
                 residual = np.linalg.norm(A @ x - b)
-                print(f"   🎯 Resíduo: {residual:.2e}")
+                print(f"   🎯 Resíduo: {residual:.{decimal_places}f}")
                 
                 # Mostrar algumas componentes da solução
                 print(f"   🔢 x[0:5]: {x[:5] if len(x) >= 5 else x}")
@@ -96,7 +98,7 @@ def solve_with_selected_methods(A, b, matrix_name, args):
                     print(f"   🔢 x[-5:]: {x[-5:]}")
             else:
                 print(f"   ❌ Não convergiu após {info['iterations']} iterações")
-                print(f"   📊 Erro final: {info['final_error']:.2e}")
+                print(f"   📊 Erro final: {info['final_error']:.{decimal_places}f}")
                 
         except Exception as e:
             print(f"   💥 Erro: {str(e)}")
@@ -105,8 +107,10 @@ def solve_with_selected_methods(A, b, matrix_name, args):
     return results, solutions
 
 
-def compare_solutions(solutions, A, b):
+def compare_solutions(solutions, A, b, config):
     """Compara as soluções obtidas pelos diferentes métodos."""
+    
+    decimal_places = config.get('decimal_places', 4)
     
     print("\n🔍 COMPARAÇÃO DAS SOLUÇÕES")
     print("-" * 50)
@@ -124,7 +128,7 @@ def compare_solutions(solutions, A, b):
         for method_name, x in solutions.items():
             if x is not None:
                 error = np.linalg.norm(x - x_ref, ord=np.inf)
-                print(f"  {method_name:20}: erro = {error:.2e}")
+                print(f"  {method_name:20}: erro = {error:.{decimal_places}f}")
                 
     except np.linalg.LinAlgError:
         print("Não foi possível calcular solução de referência (matriz singular)")
@@ -140,7 +144,7 @@ def compare_solutions(solutions, A, b):
                 x = solutions[method_name]
                 if x is not None and x_ref is not None:
                     error = np.linalg.norm(x - x_ref, ord=np.inf)
-                    print(f"  {method_name} vs {ref_method}: erro = {error:.2e}")
+                    print(f"  {method_name} vs {ref_method}: erro = {error:.{decimal_places}f}")
 
 
 def _plot_subplot(ax, data, plot_type, title, xlabel, ylabel, use_log=False):

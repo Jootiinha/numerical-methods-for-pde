@@ -1,0 +1,21 @@
+============================================================
+LINEAR SOLVER - RELATÓRIO DE EXECUÇÃO
+============================================================
+
+CONFIGURAÇÕES DA EXECUÇÃO:
+------------------------------
+Tolerância: 0.0001
+Máximo de iterações: 5000
+Gráficos habilitados: Sim
+Salvar soluções: Não
+Análise de condicionamento: Habilitada
+Dados anteriores limpos: Sim
+Métodos selecionados: TODOS
+
+SISTEMAS PROCESSADOS:
+------------------------------
+Total de sistemas encontrados: 1
+
+ 1. Sistema Brasileiro 36x36
+
+Relatório gerado em: /Users/joao.monteiro/Documents/personal_projects/numerical-methods-for-pde

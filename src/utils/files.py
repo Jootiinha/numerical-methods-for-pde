@@ -1,6 +1,32 @@
 import numpy as np
+import yaml
 from pathlib import Path
 from src.linear_solver.utils.csv_loader import CSVMatrixLoader
+
+def load_config():
+    """Carrega as configurações do arquivo config.yaml."""
+    config_path = Path("config.yaml")
+    if not config_path.exists():
+        print("⚠️  Arquivo config.yaml não encontrado. Usando valores padrão.")
+        return {
+            'decimal_places': 4,
+            'suppress_scientific_notation': True
+        }
+    
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+            # Retorna o dicionário 'settings' ou um dicionário vazio se não for encontrado
+            return config.get('settings', {
+                'decimal_places': 4,
+                'suppress_scientific_notation': True
+            })
+    except Exception as e:
+        print(f"❌ Erro ao ler config.yaml: {e}. Usando valores padrão.")
+        return {
+            'decimal_places': 4,
+            'suppress_scientific_notation': True
+        }
 
 def clear_old_results():
     """Limpa resultados anteriores das pastas de output."""

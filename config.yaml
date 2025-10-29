@@ -1,0 +1,9 @@
+# Arquivo de Configuração Principal
+
+settings:
+  # Define o número de casas decimais para a exibição de resultados numéricos.
+  decimal_places: 4
+
+  # Suprime a notação científica (ex: 1.23e-04) em favor do formato de ponto fixo (ex: 0.0001).
+  # 'true' para suprimir, 'false' para permitir.
+  suppress_scientific_notation: true

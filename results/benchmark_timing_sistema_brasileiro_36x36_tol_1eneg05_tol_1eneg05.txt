@@ -1,0 +1,115 @@
+================================================================================
+BENCHMARK DE TEMPO DE EXECUÇÃO - MÉTODOS ITERATIVOS
+================================================================================
+
+Sistema: Sistema Brasileiro 36x36_tol_1eneg05
+Tolerância: 1e-05
+Máximo de iterações: 5000
+
+RESUMO EXECUTIVO:
+----------------------------------------
+RANKING DE PERFORMANCE (tempo médio para convergência):
+ 1. Jacobi                         0.0006s (100.0% sucesso, 33.0 iter)
+ 2. Jacobi Ordem 2                 0.0010s (100.0% sucesso, 41.0 iter)
+ 3. SOR (ω=1.25)                   0.0023s (100.0% sucesso, 14.0 iter)
+ 4. Gauss-Seidel                   0.0036s (100.0% sucesso, 19.0 iter)
+
+ESTATÍSTICAS DETALHADAS POR MÉTODO:
+--------------------------------------------------
+
+JACOBI:
+------
+  Execuções totais: 10
+  Execuções bem-sucedidas: 10
+  Taxa de sucesso: 100.0%
+  Tempo médio (sucessos): 0.000582s
+  Tempo mediano (sucessos): 0.000571s
+  Tempo mínimo: 0.000463s
+  Tempo máximo: 0.000771s
+  Desvio padrão: 0.000089s
+  Iterações médias: 33.0
+  Iterações medianas: 33.0
+  Min/Max iterações: 33/33
+  Erro final médio: 2.08e-05
+  Resíduo médio: 4.00e-05
+
+GAUSS-SEIDEL:
+------------
+  Execuções totais: 10
+  Execuções bem-sucedidas: 10
+  Taxa de sucesso: 100.0%
+  Tempo médio (sucessos): 0.003644s
+  Tempo mediano (sucessos): 0.002544s
+  Tempo mínimo: 0.002083s
+  Tempo máximo: 0.010097s
+  Desvio padrão: 0.002481s
+  Iterações médias: 19.0
+  Iterações medianas: 19.0
+  Min/Max iterações: 19/19
+  Erro final médio: 7.14e-06
+  Resíduo médio: 1.41e-05
+
+SOR (Ω=1.25):
+------------
+  Execuções totais: 10
+  Execuções bem-sucedidas: 10
+  Taxa de sucesso: 100.0%
+  Tempo médio (sucessos): 0.002283s
+  Tempo mediano (sucessos): 0.001741s
+  Tempo mínimo: 0.001541s
+  Tempo máximo: 0.004668s
+  Desvio padrão: 0.000995s
+  Iterações médias: 14.0
+  Iterações medianas: 14.0
+  Min/Max iterações: 14/14
+  Erro final médio: 1.27e-06
+  Resíduo médio: 5.53e-06
+
+JACOBI ORDEM 2:
+--------------
+  Execuções totais: 10
+  Execuções bem-sucedidas: 10
+  Taxa de sucesso: 100.0%
+  Tempo médio (sucessos): 0.001032s
+  Tempo mediano (sucessos): 0.000734s
+  Tempo mínimo: 0.000711s
+  Tempo máximo: 0.002427s
+  Desvio padrão: 0.000647s
+  Iterações médias: 41.0
+  Iterações medianas: 41.0
+  Min/Max iterações: 41/41
+  Erro final médio: 3.00e-05
+  Resíduo médio: 5.79e-05
+
+ESTIMATIVAS DE TEMPO DE MÁQUINA:
+----------------------------------------
+Para obter resultados aceitáveis (convergência com tolerância especificada):
+
+Jacobi:
+  Tempo típico: 0.0006s
+  Tempo conservador (+2σ): 0.0008s
+  Probabilidade de sucesso: 100.0%
+  Iterações típicas: 33
+  Classificação: MUITO RÁPIDO
+
+Jacobi Ordem 2:
+  Tempo típico: 0.0010s
+  Tempo conservador (+2σ): 0.0023s
+  Probabilidade de sucesso: 100.0%
+  Iterações típicas: 41
+  Classificação: MUITO RÁPIDO
+
+SOR (ω=1.25):
+  Tempo típico: 0.0023s
+  Tempo conservador (+2σ): 0.0043s
+  Probabilidade de sucesso: 100.0%
+  Iterações típicas: 14
+  Classificação: MUITO RÁPIDO
+
+Gauss-Seidel:
+  Tempo típico: 0.0036s
+  Tempo conservador (+2σ): 0.0086s
+  Probabilidade de sucesso: 100.0%
+  Iterações típicas: 19
+  Classificação: MUITO RÁPIDO
+

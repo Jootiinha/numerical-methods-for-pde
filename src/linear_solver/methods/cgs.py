@@ -69,6 +69,7 @@ class CGSSolver(LinearSolver):
                 break  # Breakdown do método
 
             # v = A pₖ
+            # Multiplicador matricial
             v = A @ p
 
             # αₖ = ρₖ / (r̃₀ᵀ v)

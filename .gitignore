@@ -170,8 +170,6 @@ examples/
 *.svg
 temp_*
 output/
-results/
-data/
 
 # OS specific
 .DS_Store
@@ -181,3 +179,7 @@ data/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+
+.docs_apresentacao/

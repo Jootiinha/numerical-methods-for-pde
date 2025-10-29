@@ -441,12 +441,15 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 - **mypy**: Verificação de tipos estáticos
 - **Pre-commit**: Hooks de qualidade de código
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
 **João Monteiro**  
 📧 joaocrm@id.uff.br  
 🔗 [GitHub](https://github.com/jootiinha)
 
+
+**Gabriel Santos Piveti**
+**Lieger Duarte de Oliveira Rosa**
 ---
 
 **⭐ Se este projeto foi útil para você, considere dar uma estrela no GitHub!**

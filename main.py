@@ -4,6 +4,7 @@ Aplicação principal para resolver sistemas lineares e não lineares.
 """
 import warnings
 from pathlib import Path
+import numpy as np
 
 from src.analysis.matrix_analyzer import (
     analisar_condicionamento_sistema,
@@ -23,6 +24,7 @@ from src.utils.files import (
     create_summary_report,
     descobrir_sistemas_disponiveis,
     save_solutions,
+    load_config,
 )
 
 warnings.filterwarnings("ignore")
@@ -54,7 +56,7 @@ def _print_execution_summary(args):
     print("=" * 60)
 
 
-def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
+def _process_linear_system(nome, tipo, arquivo1, arquivo2, args, config):
     """Carrega e processa um único sistema linear."""
     A, b = carregar_sistema(nome, tipo, arquivo1, arquivo2)
     if A is None or b is None:
@@ -72,8 +74,8 @@ def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
             else:
                 print("⚠️  Análise de condicionamento pulada (--skip-conditioning)")
 
-            results, solutions = solve_with_selected_methods(A, b, nome, args)
-            compare_solutions(solutions, A, b)
+            results, solutions = solve_with_selected_methods(A, b, nome, args, config)
+            compare_solutions(solutions, A, b, config)
             save_solutions(solutions, A, b, nome, args)
 
             if not args.no_plots:
@@ -95,6 +97,14 @@ def _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
 def main():
     """Função principal da aplicação."""
     args = parse_arguments()
+
+    # Carregar configuração e definir opções de impressão
+    config = load_config()
+    np.set_printoptions(
+        precision=config.get('decimal_places', 4),
+        suppress=config.get('suppress_scientific_notation', True)
+    )
+
     _print_execution_summary(args)
 
     if args.clear_old_data:
@@ -116,7 +126,7 @@ def main():
     sistemas_processados = []
     for i, (nome, tipo, arquivo1, arquivo2) in enumerate(sistemas, 1):
         print(f"\n{'='*60}\nPROCESSANDO {i}/{len(sistemas)}: {nome}\n{'='*60}")
-        if _process_linear_system(nome, tipo, arquivo1, arquivo2, args):
+        if _process_linear_system(nome, tipo, arquivo1, arquivo2, args, config):
             sistemas_processados.append(nome)
         if i < len(sistemas):
             print("\n" + "~" * 60)
